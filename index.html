@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>PTN Dashboard</title>
-    <style>
+  <style>
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
@@ -44,30 +44,9 @@
       border-radius: 8px;
       background: white;
       box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    }
-
-    /* Layout Form + Sheet */
-    .form-sheet-container {
-      display: flex;
-      gap: 20px;
-      margin-top: 10px;
-    }
-    .form-sheet-container iframe {
-      flex: 1;
       width: 100%;
       min-height: 600px;
-    }
-    .form-frame { max-width: 640px; }
-    .sheet-frame { max-width: 800px; }
-
-    /* Responsive: mobile xuống hàng */
-    @media (max-width: 900px) {
-      .form-sheet-container {
-        flex-direction: column;
-      }
-      .form-frame, .sheet-frame {
-        max-width: 100%;
-      }
+      margin-bottom: 20px;
     }
 
     /* Link thư mục */
@@ -109,13 +88,11 @@
 
   <!-- Form + Sheets -->
   <h2>Công việc & Theo dõi</h2>
-  <div class="form-sheet-container">
-    <!-- Google Form -->
-    <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfRll9yQzmv5t9OHBKAZFYpNKtb6chKqn8lcJ3nfc1U8NFEiA/viewform?embedded=true"></iframe>
+  <!-- Google Form -->
+  <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfRll9yQzmv5t9OHBKAZFYpNKtb6chKqn8lcJ3nfc1U8NFEiA/viewform?embedded=true"></iframe>
 
-    <!-- Google Sheets -->
-    <iframe src="https://docs.google.com/spreadsheets/d/1t6ZJf5wu2iSf5spfFx-fP8tT9-AZUEQ-17xUn8YiSMo/edit?usp=sharing"></iframe>
-  </div>
+  <!-- Google Sheets -->
+  <iframe src="https://docs.google.com/spreadsheets/d/1t6ZJf5wu2iSf5spfFx-fP8tT9-AZUEQ-17xUn8YiSMo/edit?usp=sharing"></iframe>
   <hr>
 
   <!-- Google Drive folders -->
@@ -150,8 +127,12 @@
       canvas.height = video.videoHeight; 
       ctx.drawImage(video, 0, 0); 
 
-      const dataUrl = canvas.toDataURL("image/jpg");
-      uploadImage(dataUrl, "pc_" + Date.now() + ".jpg");
+      // lấy mime type từ dataUrl
+      const dataUrl = canvas.toDataURL("image/jpeg");
+      const mimeMatch = dataUrl.match(/^data:(image\/\w+);base64,/);
+      const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
+      const ext = mimeType.split("/")[1];
+      uploadImage(dataUrl, "pc_" + Date.now() + "." + ext);
     };
   }
 
@@ -176,12 +157,11 @@
 
   // Hàm chung upload lên Apps Script
   function uploadImage(dataUrl, filename) {
-    // Lấy đúng mime type (png, jpeg, webp...)
     const mimeMatch = dataUrl.match(/^data:(image\/\w+);base64,/);
-    const mimeType = mimeMatch ? mimeMatch[1] : "image/jpg";
+    const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
 
     const base64Data = dataUrl.replace(/^data:image\/\w+;base64,/, "");
-    fetch("https://script.google.com/macros/s/AKfycbxbuZQcxVMdmcB1P86832jwHaHV60A07Tq-1EVHBXcu8Qvl2U5_JC5G3hbUzH9IghVX/exec", {
+    fetch("https://script.google.com/macros/s/AKfycbzsAptqEsHZPOvFz9fY8UcfUzkriWECP4-6g-s6dW8qh6GFefHuNfUdYAUo-0gGOgut/exec", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -197,7 +177,3 @@
 </script>
 
 </html>
-
-
-
-

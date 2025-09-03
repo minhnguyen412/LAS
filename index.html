@@ -72,11 +72,10 @@
 
   <!-- Camera -->
   <h2>Chụp ảnh thí nghiệm</h2> 
-  <!-- PC webcam -->
+
+  <!-- PC: thông báo -->
   <div id="pcCamera">
-    <video id="video" autoplay width="400" height="300"></video><br>
-    <button id="capture">Chụp ảnh (PC)</button>
-    <canvas id="canvas" style="display:none;"></canvas>
+    <p>Mở điện thoại để chụp hình và upload.</p>
   </div>
 
   <!-- Mobile camera -->
@@ -107,33 +106,10 @@
 <script>
   const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
-  // Nếu mobile thì ẩn PC camera, hiện mobile camera
+  // Nếu là mobile thì hiện input upload
   if (isMobile) {
     document.getElementById('pcCamera').style.display = 'none';
     document.getElementById('mobileCamera').style.display = 'block';
-  } else {
-    // PC: bật webcam
-    const video = document.getElementById('video'); 
-    const canvas = document.getElementById('canvas'); 
-    const captureBtn = document.getElementById('capture');  
-
-    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => { 
-      video.srcObject = stream; 
-    });  
-
-    captureBtn.onclick = () => { 
-      const ctx = canvas.getContext('2d'); 
-      canvas.width = video.videoWidth; 
-      canvas.height = video.videoHeight; 
-      ctx.drawImage(video, 0, 0); 
-
-      // lấy mime type từ dataUrl
-      const dataUrl = canvas.toDataURL("image/jpeg");
-      const mimeMatch = dataUrl.match(/^data:(image\/\w+);base64,/);
-      const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
-      const ext = mimeType.split("/")[1];
-      uploadImage(dataUrl, "pc_" + Date.now() + "." + ext);
-    };
   }
 
   // Mobile: upload từ input file
@@ -154,56 +130,52 @@
       reader.readAsDataURL(file);
     };
   }
-
-  // Hàm chung upload lên Apps Script
+  // Hàm resize & upload
   function uploadImage(dataUrl, filename, maxWidth = 1024, maxHeight = 1024) {
-  const img = new Image();
-  img.onload = () => {
-    // Tính tỉ lệ resize
-    let width = img.width;
-    let height = img.height;
-    const ratio = Math.min(maxWidth / width, maxHeight / height, 1); // không upscale
-    width = width * ratio;
-    height = height * ratio;
+    const img = new Image();
+    img.onload = () => {
+      let width = img.width;
+      let height = img.height;
+      const ratio = Math.min(maxWidth / width, maxHeight / height, 1);
+      width *= ratio;
+      height *= ratio;
 
-    // Vẽ lên canvas resize
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0, width, height);
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
 
-    // Lấy dataURL resized
-    const resizedDataUrl = canvas.toDataURL("image/jpeg", 0.8); // chất lượng 80%
-    const mimeMatch = resizedDataUrl.match(/^data:(image\/\w+);base64,/);
-    const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
-    const base64Data = resizedDataUrl.replace(/^data:image\/\w+;base64,/, "").replace(/\s/g, "");
+      const resizedDataUrl = canvas.toDataURL("image/jpeg", 0.8);
+      const mimeMatch = resizedDataUrl.match(/^data:(image\/\w+);base64,/);
+      const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
+      const base64Data = resizedDataUrl.replace(/^data:image\/\w+;base64,/, "").replace(/\s/g, "");
 
-    // Gửi lên proxy
-    fetch("/.netlify/functions/uploadProxy", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        image: base64Data,
-        filename: filename,
-        mimeType: mimeType
+      fetch("/.netlify/functions/uploadProxy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          image: base64Data,
+          filename: filename,
+          mimeType: mimeType
+        })
       })
-    })
-    .then(res => res.json())
-    .then(txt => {
-      if(txt.status === "success") {
-        alert("Uploaded: " + txt.fileUrl);
-      } else {
-        alert("Upload error: " + txt.message);
-      }
-    })
-    .catch(err => alert("Upload failed: " + err));
-  };
-  img.src = dataUrl;
-}
+      .then(res => res.json())
+      .then(txt => {
+        if(txt.status === "success") {
+          alert("Uploaded: " + txt.fileUrl);
+        } else {
+          alert("Upload error: " + txt.message);
+        }
+      })
+      .catch(err => alert("Upload failed: " + err));
+    };
+    img.src = dataUrl;
+  }
 </script>
 
 </html>
+
 
 
 

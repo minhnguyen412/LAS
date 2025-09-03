@@ -161,7 +161,7 @@
     const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
 
     const base64Data = dataUrl.replace(/^data:image\/\w+;base64,/, "");
-    fetch("https://script.google.com/macros/s/AKfycbyOO1Qu_MmBsPgpMNLO8pQwtVRUTILqxkxGPEQFHhQNXcDL2Iqak4JguJa1vdfBBbc/exec", {
+    fetch("/.netlify/functions/uploadProxy", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -177,4 +177,5 @@
 </script>
 
 </html>
+
 

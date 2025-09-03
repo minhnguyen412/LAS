@@ -156,11 +156,30 @@
   }
 
   // Hàm chung upload lên Apps Script
-  function uploadImage(dataUrl, filename) {
-    const mimeMatch = dataUrl.match(/^data:(image\/\w+);base64,/);
-    const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
+  function uploadImage(dataUrl, filename, maxWidth = 1024, maxHeight = 1024) {
+  const img = new Image();
+  img.onload = () => {
+    // Tính tỉ lệ resize
+    let width = img.width;
+    let height = img.height;
+    const ratio = Math.min(maxWidth / width, maxHeight / height, 1); // không upscale
+    width = width * ratio;
+    height = height * ratio;
 
-    const base64Data = dataUrl.replace(/^data:image\/\w+;base64,/, "");
+    // Vẽ lên canvas resize
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, width, height);
+
+    // Lấy dataURL resized
+    const resizedDataUrl = canvas.toDataURL("image/jpeg", 0.8); // chất lượng 80%
+    const mimeMatch = resizedDataUrl.match(/^data:(image\/\w+);base64,/);
+    const mimeType = mimeMatch ? mimeMatch[1] : "image/jpeg";
+    const base64Data = resizedDataUrl.replace(/^data:image\/\w+;base64,/, "").replace(/\s/g, "");
+
+    // Gửi lên proxy
     fetch("/.netlify/functions/uploadProxy", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -170,12 +189,21 @@
         mimeType: mimeType
       })
     })
-    .then(res => res.text())
-    .then(txt => alert("Uploaded: " + txt))
+    .then(res => res.json())
+    .then(txt => {
+      if(txt.status === "success") {
+        alert("Uploaded: " + txt.fileUrl);
+      } else {
+        alert("Upload error: " + txt.message);
+      }
+    })
     .catch(err => alert("Upload failed: " + err));
-  }
+  };
+  img.src = dataUrl;
+}
 </script>
 
 </html>
+
 
 

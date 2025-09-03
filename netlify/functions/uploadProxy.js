@@ -12,7 +12,7 @@ export async function handler(event, context) {
     }
 
     // URL Apps Script Web App
-    const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbzHS5OcOo6DIXpQbLivetcS4TqJynv80e5xXZQ9G96Eeac724IbEj_QK5BiI-HUSJUy/exec';
+    const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbz5Stw3TzQxT2M-7Y4kcYFwrCgdTB6WqxLZDZfbx6Y3Xv5llRdKpQWlyWLYs--ww9q9/exec';
 
     const res = await fetch(WEBAPP_URL, {
       method: 'POST',
@@ -36,3 +36,4 @@ export async function handler(event, context) {
     };
   }
 }
+

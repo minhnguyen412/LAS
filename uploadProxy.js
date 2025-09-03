@@ -13,7 +13,7 @@ export async function handler(event, context) {
     }
 
     // URL Apps Script Web App
-    const WEBAPP_URL = 'https://script.google.com/macros/s/YOUR_WEBAPP_ID/exec';
+    const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbzHS5OcOo6DIXpQbLivetcS4TqJynv80e5xXZQ9G96Eeac724IbEj_QK5BiI-HUSJUy/exec';
 
     const res = await fetch(WEBAPP_URL, {
       method: 'POST',

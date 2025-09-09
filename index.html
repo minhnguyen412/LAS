@@ -103,6 +103,7 @@ async function loadSheets() {
   const response = await fetch("https://script.google.com/macros/s/AKfycbxicVGWO8hV0Lk90vrKqQV7w-Z-kNQWhvFcBzzSSDgVfN3ASR2vb4tcPB8qFgl4zHoT/exec");
   const sheets = await response.json();
   const selector = document.getElementById("sheetSelector");
+  const container = document.getElementById("sheetContainer");
 
   // tạo option
   sheets.forEach(sheet => {
@@ -112,9 +113,21 @@ async function loadSheets() {
     selector.appendChild(opt);
   });
 
+  // nếu có ít nhất 1 file thì hiển thị luôn file đầu tiên
+  if (sheets.length > 0) {
+    selector.value = sheets[0].url; // chọn mặc định
+    container.innerHTML = `
+      <div class="sheet-frame">
+        <iframe src="${sheets[0].url}" width="100%" height="600" frameborder="0"></iframe>
+      </div>`;
+  }
+
+  // đổi khi chọn dropdown
   selector.addEventListener("change", () => {
-    document.getElementById("sheetContainer").innerHTML =
-      `<iframe src="${selector.value}" width="100%" height="600" frameborder="0"></iframe>`;
+    container.innerHTML = `
+      <div class="sheet-frame">
+        <iframe src="${selector.value}" width="100%" height="600" frameborder="0"></iframe>
+      </div>`;
   });
 }
 
@@ -218,6 +231,7 @@ loadSheets();
 </script>
   
 </html>
+
 
 
 

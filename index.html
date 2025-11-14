@@ -65,6 +65,26 @@
       background: #d6eaf8;
       text-decoration: underline;
     }
+    .custom-file {
+      display: inline-block;
+      padding: 14px 22px;
+      background: #3498db;
+      color: white;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .custom-file:hover {
+      background: #217dbb;
+    }
+
+    #cameraInput {
+      display: none; /* ẨN INPUT FILE */
+    }
     /* --- STYLE BẢNG 5 CỘT 29 HÀNG --- */
     .quick-table {
     width: 100%;
@@ -126,7 +146,7 @@
   <!-- Mobile camera -->
   <div id="mobileCamera" style="display:none;">
     <p>Truy cập bằng điện thoại để chụp hình ngay trong dashboard và upload. Sau khi chụp xong, nhấn upload, hình ảnh sẽ vào thư mục drive Ảnh thí nghiệm</p>
-    <!-- Input file bị ẩn -->
+    <label for="cameraInput" class="custom-file">📷 Chọn ảnh / Chụp ảnh</label>
     <input type="file" accept="image/*" capture="environment" id="cameraInput">
     <button id="uploadBtn">Upload (Mobile)</button>
   </div>
@@ -317,6 +337,7 @@ loadSheets();
 </script>
   
 </html>
+
 
 
 

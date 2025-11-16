@@ -123,9 +123,39 @@
     color: #ff6600;
     transform: translateY(-2px);
   }
-  
+  .section-content {
+    display: none;
+    margin-top: 10px;
+  }
+
+  .collapsible {
+    cursor: pointer;
+    user-select: none;
+    padding: 6px 0;
+  }
+
+  /* icon mũi tên đẹp */
+  .collapsible::after {
+    content: " ▼";
+    font-weight: bold;
+    font-size: 14px;
+    transition: 0.2s;
+  }
+
+  .collapsible.active::after {
+    content: " ▲";
+  }
   </style>
 </head>
+  <script>
+document.querySelectorAll(".collapsible").forEach(h2 => {
+  h2.addEventListener("click", () => {
+    h2.classList.toggle("active");
+    const content = h2.nextElementSibling;
+    content.style.display = content.style.display === "block" ? "none" : "block";
+  });
+});
+</script>
 <body>
   <h1>PTN Dashboard</h1> 
   <!-- Google Drive folders -->
@@ -204,7 +234,8 @@
   <h2>Số hóa phòng LAS</h2>
   <a href="https://drive.google.com/file/d/1vAqtvNWRyLYPjrGqmlGR16tAYA0Z_6ko/view?usp=sharing">⬇ HƯỚNG DẪN TẠO BIỂU VÀ NHẬP SỐ LIỆU TỰ ĐỘNG</a>
   <!-- SHEETS -->
-  <h2>Theo dõi tiến độ thí nghiệm hố khoan</h2>
+  <h2 class="collapsible">Theo dõi tiến độ thí nghiệm hố khoan</h2>
+  <div class="section-content">
   <p>Tiến độ hố khoan được hiển thị khi nhập sổ mở mẫu và số liệu thí nghiệm vào biểu Google Sheets trong thư mục Biểu nhập số thí nghiệm. Chọn tên hố khoan trong phần xổ xuống để hiện thị biểu có tên tương ứng.</p>
   <select id="sheetSelector"></select>
 <div id="sheetContainer"></div>
@@ -244,10 +275,11 @@ async function loadSheets() {
 
 loadSheets();
 </script>
-
+</div>
 
   <!-- Form + Sheets -->
-  <h2>Công việc & Theo dõi</h2>
+  <h2 class="collapsible">Công việc & Theo dõi</h2>
+  <div class="section-content">
   <p>Mỗi ngày, các TNV điền thông tin và đánh dấu các công đoạn tham gia vào Google Form và gửi đi, dữ liệu sẽ được lưu lại và thống kê.</p>
   <!-- Google Form -->
   <iframe src="https://docs.google.com/forms/d/e/1FAIpQLSfRll9yQzmv5t9OHBKAZFYpNKtb6chKqn8lcJ3nfc1U8NFEiA/viewform?embedded=true"></iframe>
@@ -255,6 +287,7 @@ loadSheets();
 
   <!-- Google Sheets -->
   <iframe src="https://docs.google.com/spreadsheets/d/1t6ZJf5wu2iSf5spfFx-fP8tT9-AZUEQ-17xUn8YiSMo/edit?usp=sharing"></iframe>
+  </div>
   <hr>
   <h2>Các biểu quan trọng</h2> 
   <p>Biểu hiển thị ở dashboard chỉ để theo dõi, tránh chỉnh sửa. Nếu muốn chỉnh sửa, vui lòng truy cập vào các link sau và yêu cầu cấp quyền truy cập để đảm bảo tính bảo mật.</p>
@@ -342,6 +375,7 @@ loadSheets();
 </script>
   
 </html>
+
 
 
 

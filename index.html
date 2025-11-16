@@ -147,15 +147,6 @@
   }
   </style>
 </head>
-  <script>
-document.querySelectorAll(".collapsible").forEach(h2 => {
-  h2.addEventListener("click", () => {
-    h2.classList.toggle("active");
-    const content = h2.nextElementSibling;
-    content.style.display = content.style.display === "block" ? "none" : "block";
-  });
-});
-</script>
 <body>
   <h1>PTN Dashboard</h1> 
   <!-- Google Drive folders -->
@@ -300,7 +291,15 @@ loadSheets();
   ⋆｡‧˚ʚ🍓ɞ˚‧｡⋆CHÚC CÁC BẠN LÀM VIỆC HIỆU QUẢ VÀ VUI VẺ!⋆｡‧˚ʚ🍓ɞ˚‧｡⋆
 </p>
 
-  
+<script>
+document.querySelectorAll(".collapsible").forEach(h2 => {
+  h2.addEventListener("click", () => {
+    h2.classList.toggle("active");
+    const content = h2.nextElementSibling;
+    content.style.display = content.style.display === "block" ? "none" : "block";
+  });
+});
+</script>  
 </body>
 
 <script>
@@ -375,6 +374,7 @@ loadSheets();
 </script>
   
 </html>
+
 
 
 

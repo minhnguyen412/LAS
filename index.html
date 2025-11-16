@@ -148,18 +148,23 @@
   </style>
 </head>
 <body>
-  <h1>PTN Dashboard</h1> 
-  <!-- Google Drive folders -->
-  <h2>Các thư mục quan trọng</h2> 
-  <div class="folder-links">
-    <a href="https://drive.google.com/drive/folders/1yed3TBGnktmakcwekL60fOOOBgousdA_?usp=sharing">Ảnh thí nghiệm</a>
-    <a href="https://drive.google.com/drive/folders/1Onjlnxh62Br5QglU_YCJ67jG8JYt6nBn?usp=sharing">Yêu cầu thí nghiệm</a>
-    <a href="https://drive.google.com/drive/folders/11DVnrcLxa3NHv-Y23emDZ36Lob3BwB9N?usp=sharing">Biểu nhập số thí nghiệm</a>
-    <a href="https://drive.google.com/drive/folders/12KTIuFwtOtChzj6dXV9Mpfgk6FsiBWXx?usp=sharing">Các công cụ tự động hóa</a>
+  <h1>PTN Dashboard</h1>
+  <h2>Mục lục</h2>
+  <div class="toc">
+    <ul>
+        <li><a href="#1">Chụp ảnh thí nghiệm</a></li>
+        <li><a href="#2">Quy trình làm thí nghiệm</a></li>
+        <li><a href="#3">Các dụng cụ và thiết bị</a></li>
+        <li><a href="#4">Số hóa phòng LAS</a></li>
+        <li><a href="#5">Theo dõi tiến độ thí nghiệm hố khoan</a></li>
+        <li><a href="#6">Công việc & Theo dõi</a></li>
+        <li><a href="#7">Các thư mục quan trọng</a></li>
+        <li><a href="#8">Các biểu quan trọng</a></li>
+    </ul>
   </div>
 
   <!-- Camera -->
-  <h2>Chụp ảnh thí nghiệm</h2> 
+  <h2 id="1">Chụp ảnh thí nghiệm</h2> 
 
   <!-- PC: thông báo -->
   <div id="pcCamera">
@@ -174,7 +179,7 @@
     <button id="uploadBtn">Upload (Mobile)</button>
   </div>
   <hr>
-  <h2>Quy trình làm thí nghiệm trong phòng LAS</h2>
+  <h2 id="2">Quy trình làm thí nghiệm</h2>
   <table class="quick-table">
   <tr>
     <th rowspan="2">Công việc chung</th>
@@ -221,14 +226,14 @@
   <tr><td><a href="#"></a></td><td><a href="#"></a></td><td><a href="#"></a></td><td><a href="#">Lau kiếng</a></td><td><a href="#"></a></td></tr>
 
 </table>
-  <h2>Các dụng cụ và thiết bị</h2>
-  <h2>Số hóa phòng LAS</h2>
+  <h2 id="3">Các dụng cụ và thiết bị</h2>
+  <h2 id="4">Số hóa phòng LAS</h2>
   <ul>
       <li><a href="Tools/HƯỚNG DẪN TẠO BIỂU VÀ NHẬP SỐ LIỆU TỰ ĐỘNG.pdf">⬇ HƯỚNG DẪN TẠO BIỂU VÀ NHẬP SỐ LIỆU TỰ ĐỘNG</a></li>
       <li><a href="https://drive.google.com/file/d/1I_i59J6CWOY17SkNFbZaJKKup5o5NMQ6/view?usp=sharing">⬇ PHẦN MỀM TẠO BIỂU TỰ ĐỘNG</a></li>
   </ul>
   <!-- SHEETS -->
-  <h2 class="collapsible">Theo dõi tiến độ thí nghiệm hố khoan</h2>
+  <h2 class="collapsible" id="5">Theo dõi tiến độ thí nghiệm hố khoan</h2>
   <div class="section-content">
   <p>Tiến độ hố khoan được hiển thị khi nhập sổ mở mẫu và số liệu thí nghiệm vào biểu Google Sheets trong thư mục Biểu nhập số thí nghiệm. Chọn tên hố khoan trong phần xổ xuống để hiện thị biểu có tên tương ứng.</p>
   <select id="sheetSelector"></select>
@@ -272,7 +277,7 @@ loadSheets();
 </div>
 
   <!-- Form + Sheets -->
-  <h2 class="collapsible">Công việc & Theo dõi</h2>
+  <h2 class="collapsible" id="6">Công việc & Theo dõi</h2>
   <div class="section-content">
   <p>Mỗi ngày, các TNV điền thông tin và đánh dấu các công đoạn tham gia vào Google Form và gửi đi, dữ liệu sẽ được lưu lại và thống kê.</p>
   <!-- Google Form -->
@@ -283,7 +288,15 @@ loadSheets();
   <iframe src="https://docs.google.com/spreadsheets/d/1t6ZJf5wu2iSf5spfFx-fP8tT9-AZUEQ-17xUn8YiSMo/edit?usp=sharing"></iframe>
   </div>
   <hr>
-  <h2>Các biểu quan trọng</h2> 
+  <!-- Google Drive folders -->
+  <h2 id="7">Các thư mục quan trọng</h2> 
+  <div class="folder-links">
+    <a href="https://drive.google.com/drive/folders/1yed3TBGnktmakcwekL60fOOOBgousdA_?usp=sharing">Ảnh thí nghiệm</a>
+    <a href="https://drive.google.com/drive/folders/1Onjlnxh62Br5QglU_YCJ67jG8JYt6nBn?usp=sharing">Yêu cầu thí nghiệm</a>
+    <a href="https://drive.google.com/drive/folders/11DVnrcLxa3NHv-Y23emDZ36Lob3BwB9N?usp=sharing">Biểu nhập số thí nghiệm</a>
+    <a href="https://drive.google.com/drive/folders/12KTIuFwtOtChzj6dXV9Mpfgk6FsiBWXx?usp=sharing">Các công cụ tự động hóa</a>
+  </div>
+  <h2 id="8">Các biểu quan trọng</h2> 
   <p>Biểu hiển thị ở dashboard chỉ để theo dõi, tránh chỉnh sửa. Nếu muốn chỉnh sửa, vui lòng truy cập vào các link sau và yêu cầu cấp quyền truy cập để đảm bảo tính bảo mật.</p>
   <div class="folder-links">
     <a href="https://docs.google.com/spreadsheets/d/15WLUyBcH235TF4f0KaM145X5Pv2kvi7DaqhyTAxg8rQ/edit?usp=sharing">Biểu theo dõi tiến độ hố khoan</a>
@@ -377,6 +390,7 @@ document.querySelectorAll(".collapsible").forEach(h2 => {
 </script>
   
 </html>
+
 
 
 

@@ -226,13 +226,68 @@ header{background:var(--earth);border-bottom:var(--border-thick);padding:0 28px;
 .upload-status.success{background:var(--moss-pale);border:1.5px solid var(--moss);color:var(--moss);}
 .upload-status.error{background:#fff0ee;border:1.5px solid var(--rust);color:var(--rust);}
 
-/* Mini-cam for sidebar: hide on mobile since we use file-input approach */
+/* ══ RESPONSIVE ══ */
 @media(max-width:760px){
+  /* Layout */
   .app-layout{grid-template-columns:1fr;}
   .sidebar{position:static;height:auto;border-right:none;border-bottom:var(--border-thick);}
   .minicam-wrap{display:none;}
+  .main-content{padding:0;}
+  .content-section{padding:14px 12px 40px;}
+
+  /* Header */
+  header{padding:0 12px;}
+  .logo{font-size:1.1rem;}
+  .logo-badge{display:none;}
+  .user-pill{padding:4px 8px 4px 6px;font-size:.76rem;}
+  .header-btn{padding:5px 10px;font-size:.76rem;}
+
+  /* Sample card header — stack into 2 rows on mobile */
+  .sample-header{
+    grid-template-columns:auto 1fr auto;
+    grid-template-rows:auto auto;
+    gap:6px;
+    padding:8px 10px;
+  }
+  /* Row 1: id | name | actions */
+  .s-id{grid-column:1;grid-row:1;}
+  .s-name{grid-column:2;grid-row:1;}
+  .s-actions{grid-column:3;grid-row:1;}
+  /* Row 2: types + progress spanning full width */
+  .s-types{grid-column:1/3;grid-row:2;margin-left:0;}
+  .s-progress{grid-column:3;grid-row:2;justify-content:flex-end;}
+
+  /* Hide type tags that are "off" on mobile to save space */
+  .type-tag.off{display:none;}
+
+  /* Sec header wrap */
+  .sec-header{flex-direction:column;align-items:flex-start;gap:8px;}
+  .sec-header>div:last-child{width:100%;display:flex;flex-wrap:wrap;gap:6px;}
+
+  /* Samples toolbar */
+  .samples-toolbar{flex-direction:column;align-items:stretch;}
+  .search-box{min-width:0;width:100%;}
+
+  /* Forms */
   .form-row,.form-row-3{grid-template-columns:1fr;}
+
+  /* Bulk modal */
   .bulk-grid{grid-template-columns:1fr;}
+  .modal-xl{width:95vw;}
+  .bulk-modal{width:95vw;}
+
+  /* Workflow grid */
+  .workflow-grid{grid-template-columns:1fr;}
+
+  /* Today table — scrollable */
+  #section-today .main-content{overflow-x:auto;}
+
+  /* Archive bulk bar */
+  #archive-bulk-bar{flex-direction:column;align-items:stretch;}
+  #archive-bulk-bar .btn{justify-content:center;}
+
+  /* Buttons in sec-header full width on mobile */
+  .sec-header .btn{flex:1;justify-content:center;min-width:0;}
 }
 </style>
 </head>
@@ -545,42 +600,27 @@ header{background:var(--earth);border-bottom:var(--border-thick);padding:0 28px;
 var FB_CONFIG={apiKey:"AIzaSyCiLP0uKWKR3LkvvdaSabSxhzN9s6G7A6c",authDomain:"las-dashboard-522c4.firebaseapp.com",projectId:"las-dashboard-522c4",storageBucket:"las-dashboard-522c4.firebasestorage.app",messagingSenderId:"297545923187",appId:"1:297545923187:web:620d57ce99a5aea70f4806"};
 var db=null,fbAuth=null,currentUser=null,fbReady=false;
 var DEMO_MODE=false;
-var _firestoreLoaded=false; // guard: only load once
+var _firestoreLoaded=false;
 try{
   firebase.initializeApp(FB_CONFIG);
   db=firebase.firestore();
   fbAuth=firebase.auth();
   fbReady=true;
 
-  // Step 1: handle redirect result FIRST — this resolves the pending credential
-  // from signInWithRedirect before onAuthStateChanged fires with the real user.
-  fbAuth.getRedirectResult().then(function(result){
-    if(result&&result.user){
-      closeAuthModal();
-      // onAuthStateChanged will fire right after with this user, so no extra work needed
-    }
-  }).catch(function(e){console.warn('Redirect result error:',e);});
+  // Popup only — works on all platforms without redirect page reload issues
+  document.getElementById('google-btn').addEventListener('click',function(){
+    fbAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+      .then(function(){closeAuthModal();})
+      .catch(function(e){alert('Lỗi đăng nhập: '+e.message);});
+  });
 
-  // Step 2: onAuthStateChanged is the single source of truth for user state.
-  // Firebase guarantees it fires once on page load (even after a redirect),
-  // so we trigger Firestore load here — never before auth is resolved.
+  // onAuthStateChanged is the single source of truth — load Firestore exactly once after auth resolves
   fbAuth.onAuthStateChanged(function(u){
     currentUser=u||null;
     updateUserUI(u);
     if(!_firestoreLoaded){
       _firestoreLoaded=true;
       loadFromFirestore();
-    }
-  });
-
-  document.getElementById('google-btn').addEventListener('click',function(){
-    // Use popup on desktop (reliable), redirect on mobile (avoids popup blockers)
-    var isMob=/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    var provider=new firebase.auth.GoogleAuthProvider();
-    if(isMob){
-      fbAuth.signInWithRedirect(provider).catch(function(e){console.warn('Redirect failed:',e);});
-    } else {
-      fbAuth.signInWithPopup(provider).then(function(){closeAuthModal();}).catch(function(e){alert('Lỗi đăng nhập: '+e.message);});
     }
   });
 }catch(e){console.warn('Firebase init error:',e);DEMO_MODE=true;}

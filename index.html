@@ -119,7 +119,6 @@ header{background:var(--earth);border-bottom:var(--border-thick);padding:0 28px;
 .archive-item-sel{opacity:1!important;background:#fff8f0!important;border-color:var(--rust)!important;}
 .done-badge{background:var(--moss-pale);border:1.5px solid var(--moss);border-radius:50px;padding:2px 9px;font-size:.72rem;font-weight:700;color:var(--moss);}
 .doc-placeholder{background:var(--white);border:var(--border-thick);border-radius:14px;padding:48px;text-align:center;color:#ccc;box-shadow:var(--shadow-sm);}
-/* confirm */
 .confirm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:1000;align-items:flex-end;justify-content:center;padding-bottom:28px;}
 .confirm-overlay.open{display:flex;}
 .confirm-box{background:var(--white);border:var(--border-thick);border-radius:18px;padding:22px;width:360px;max-width:94vw;box-shadow:var(--shadow-lg);animation:slideUp .18s ease;}
@@ -132,7 +131,6 @@ header{background:var(--earth);border-bottom:var(--border-thick);padding:0 28px;
 .empty-state h3{font-size:.95rem;font-weight:700;color:#bbb;margin-bottom:4px;}
 .hint-box{background:rgba(91,143,170,.1);border:1.5px solid var(--sky);border-radius:10px;padding:10px 14px;font-size:.8rem;line-height:1.6;margin-bottom:12px;}
 .hint-box b{color:var(--sky);}
-/* Import table */
 .import-table-wrap{border:var(--border-thick);border-radius:12px;overflow:auto;max-height:380px;margin-bottom:10px;}
 .import-table{width:100%;border-collapse:collapse;font-size:.82rem;}
 .import-table th{background:var(--earth-light);padding:7px 10px;font-weight:700;text-align:left;border-bottom:var(--border);position:sticky;top:0;z-index:2;white-space:nowrap;}
@@ -150,7 +148,6 @@ header{background:var(--earth);border-bottom:var(--border-thick);padding:0 28px;
 .imp-chip{padding:4px 12px;border-radius:50px;font-size:.76rem;font-weight:700;border:var(--border);}
 .imp-chip.green{background:var(--moss-pale);color:var(--moss);}
 .imp-chip.grey{background:#f0f0f0;color:#888;}
-/* Bulk */
 .bulk-modal{width:860px;}
 .bulk-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;}
 .bulk-section-title{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#aaa;margin-bottom:8px;padding-bottom:4px;border-bottom:1.5px solid var(--earth-pale);}
@@ -176,31 +173,14 @@ header{background:var(--earth);border-bottom:var(--border-thick);padding:0 28px;
 .bulk-toolbar{display:flex;gap:6px;margin-bottom:8px;align-items:center;flex-wrap:wrap;}
 .cnt-badge{font-size:.74rem;font-weight:700;background:var(--earth-pale);border:var(--border);border-radius:50px;padding:3px 10px;margin-left:auto;}
 @keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-/* dup warning in import */
 .dup-warn{background:#fff3cd;border-left:3px solid #c17f24;font-size:.74rem;padding:4px 8px;color:#7a4f00;}
 .row-dup td{background:#fff8e8!important;}
 .row-badge.dup{background:#fff3cd;color:#8a5a10;}
-/* bulk action bar at bottom of bulk modal */
 .bulk-action-bar{display:flex;gap:8px;align-items:center;padding:10px 14px;background:var(--earth-pale);border:var(--border);border-radius:12px;margin-top:12px;flex-wrap:wrap;}
 .bulk-action-bar .bar-label{font-size:.8rem;font-weight:700;color:#888;flex:1;min-width:120px;}
-/* Today section */
 .kpi-card{background:var(--white);border:var(--border-thick);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow-sm);text-align:center;}
 .kpi-card .kpi-val{font-size:2rem;font-weight:700;line-height:1;margin-bottom:4px;}
 .kpi-card .kpi-lbl{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#aaa;}
-.hour-bar{flex:1;min-width:0;background:var(--earth-light);border:1px solid var(--black);border-radius:3px 3px 0 0;transition:height .3s;cursor:default;position:relative;}
-.hour-bar:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:var(--black);color:var(--white);font-size:.66rem;white-space:nowrap;padding:2px 6px;border-radius:4px;pointer-events:none;z-index:10;}
-.hour-bar.today-active{background:var(--earth);}
-.hour-lbl{flex:1;min-width:0;text-align:center;font-size:.58rem;color:#bbb;font-weight:600;}
-.td-prog-wrap{display:flex;align-items:center;gap:5px;}
-.td-prog-bar{height:6px;background:var(--earth-pale);border:1px solid #ddd;border-radius:3px;overflow:hidden;width:60px;}
-.td-prog-fill{height:100%;border-radius:2px;background:var(--earth);transition:width .3s;}
-.td-prog-fill.done{background:var(--moss);}
-.td-step-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
-.step-dot-done{background:var(--moss);}
-.step-dot-today{background:var(--earth);}
-.step-dot-empty{background:#e8d8b8;border:1px solid #ccc;}
-
-/* ══ CAMERA STYLES ══ */
 .cam-snap-btn{
   display:flex;align-items:center;justify-content:center;gap:10px;
   width:100%;padding:18px;margin:8px 0;
@@ -225,68 +205,41 @@ header{background:var(--earth);border-bottom:var(--border-thick);padding:0 28px;
 .upload-status.uploading{background:rgba(91,143,170,.12);border:1.5px solid var(--sky);color:var(--sky);}
 .upload-status.success{background:var(--moss-pale);border:1.5px solid var(--moss);color:var(--moss);}
 .upload-status.error{background:#fff0ee;border:1.5px solid var(--rust);color:var(--rust);}
-
-/* ══ RESPONSIVE ══ */
 @media(max-width:760px){
-  /* Layout */
   .app-layout{grid-template-columns:1fr;}
   .sidebar{position:static;height:auto;border-right:none;border-bottom:var(--border-thick);}
   .minicam-wrap{display:none;}
   .main-content{padding:0;}
   .content-section{padding:14px 12px 40px;}
-
-  /* Header */
   header{padding:0 12px;}
   .logo{font-size:1.1rem;}
   .logo-badge{display:none;}
   .user-pill{padding:4px 8px 4px 6px;font-size:.76rem;}
   .header-btn{padding:5px 10px;font-size:.76rem;}
-
-  /* Sample card header — stack into 2 rows on mobile */
   .sample-header{
     grid-template-columns:auto 1fr auto;
     grid-template-rows:auto auto;
     gap:6px;
     padding:8px 10px;
   }
-  /* Row 1: id | name | actions */
   .s-id{grid-column:1;grid-row:1;}
   .s-name{grid-column:2;grid-row:1;}
   .s-actions{grid-column:3;grid-row:1;}
-  /* Row 2: types + progress spanning full width */
   .s-types{grid-column:1/3;grid-row:2;margin-left:0;}
   .s-progress{grid-column:3;grid-row:2;justify-content:flex-end;}
-
-  /* Hide type tags that are "off" on mobile to save space */
   .type-tag.off{display:none;}
-
-  /* Sec header wrap */
   .sec-header{flex-direction:column;align-items:flex-start;gap:8px;}
   .sec-header>div:last-child{width:100%;display:flex;flex-wrap:wrap;gap:6px;}
-
-  /* Samples toolbar */
   .samples-toolbar{flex-direction:column;align-items:stretch;}
   .search-box{min-width:0;width:100%;}
-
-  /* Forms */
   .form-row,.form-row-3{grid-template-columns:1fr;}
-
-  /* Bulk modal */
   .bulk-grid{grid-template-columns:1fr;}
   .modal-xl{width:95vw;}
   .bulk-modal{width:95vw;}
-
-  /* Workflow grid */
   .workflow-grid{grid-template-columns:1fr;}
-
-  /* Today table — scrollable */
   #section-today .main-content{overflow-x:auto;}
-
-  /* Archive bulk bar */
   #archive-bulk-bar{flex-direction:column;align-items:stretch;}
   #archive-bulk-bar .btn{justify-content:center;}
-
-  /* Buttons in sec-header full width on mobile */
   .sec-header .btn{flex:1;justify-content:center;min-width:0;}
 }
 </style>
@@ -370,52 +323,25 @@ header{background:var(--earth);border-bottom:var(--border-thick);padding:0 28px;
     <!-- CAMERA -->
     <div class="content-section" id="section-camera">
       <div class="sec-header"><div class="sec-title">📸 Chụp ảnh</div></div>
-
-      <!-- ══ MOBILE CAMERA ZONE ══ -->
       <div id="mobile-cam-zone">
         <div class="camera-panel">
           <h3>📱 Camera điện thoại</h3>
           <p style="font-size:.84rem;color:#888;margin-bottom:14px;line-height:1.6;">Nhấn nút bên dưới để mở camera, chụp ảnh xong ảnh sẽ tự động upload lên Google Drive.</p>
-
-          <!-- Hidden file input — triggers native camera on mobile -->
           <input type="file" id="cameraFileInput" accept="image/*" capture="environment"/>
-
-          <button class="cam-snap-btn" id="mobile-cam-btn">
-            📷 Chụp ảnh thí nghiệm
-          </button>
-
-          <!-- Preview of captured image -->
+          <button class="cam-snap-btn" id="mobile-cam-btn">📷 Chụp ảnh thí nghiệm</button>
           <img id="mobile-preview" class="mobile-preview" alt="Ảnh vừa chụp"/>
-
-          <!-- Status message -->
           <div id="upload-status" class="upload-status"></div>
-
-          <!-- Recent uploads list -->
           <div id="mobile-log-list" style="margin-top:14px;display:flex;flex-direction:column;gap:6px;"></div>
         </div>
-
-        
       </div>
-
-      <!-- ══ PC CAMERA ZONE ══ -->
       <div id="pc-cam-zone">
         <div class="camera-panel">
           <h3>🖼️ Tải ảnh lên Drive (Máy tính)</h3>
           <p style="font-size:.84rem;color:#888;margin-bottom:14px;line-height:1.6;">Chọn một hoặc nhiều ảnh từ máy tính để upload lên Google Drive.</p>
-
           <input type="file" id="pcFileInput" accept="image/*" multiple style="display:none;"/>
-
-          <button class="cam-snap-btn" id="pc-upload-btn" style="max-width:360px;">
-            🖼️ Chọn ảnh để upload
-          </button>
-
-          <!-- Preview strip -->
+          <button class="cam-snap-btn" id="pc-upload-btn" style="max-width:360px;">🖼️ Chọn ảnh để upload</button>
           <div id="pc-preview-strip" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
-
-          <!-- Status -->
           <div id="pc-upload-status" class="upload-status"></div>
-
-          <!-- Log -->
           <div id="pc-log-list" style="margin-top:14px;display:flex;flex-direction:column;gap:6px;"></div>
         </div>
         <div class="camera-panel">
@@ -594,9 +520,6 @@ header{background:var(--earth);border-bottom:var(--border-thick);padding:0 28px;
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
-// ════════════════════════════════════
-// FIREBASE
-// ════════════════════════════════════
 var FB_CONFIG={apiKey:"AIzaSyCiLP0uKWKR3LkvvdaSabSxhzN9s6G7A6c",authDomain:"las-dashboard-522c4.firebaseapp.com",projectId:"las-dashboard-522c4",storageBucket:"las-dashboard-522c4.firebasestorage.app",messagingSenderId:"297545923187",appId:"1:297545923187:web:620d57ce99a5aea70f4806"};
 var db=null,fbAuth=null,currentUser=null,fbReady=false;
 var DEMO_MODE=false;
@@ -607,14 +530,12 @@ try{
   fbAuth=firebase.auth();
   fbReady=true;
 
-  // Popup only — works on all platforms without redirect page reload issues
   document.getElementById('google-btn').addEventListener('click',function(){
     fbAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
       .then(function(){closeAuthModal();})
       .catch(function(e){alert('Lỗi đăng nhập: '+e.message);});
   });
 
-  // onAuthStateChanged is the single source of truth — load Firestore exactly once after auth resolves
   fbAuth.onAuthStateChanged(function(u){
     currentUser=u||null;
     updateUserUI(u);
@@ -630,7 +551,6 @@ function deleteSampleDoc(s){if(!fbReady||!db)return;db.collection('ptn_samples')
 function syncArchived(s){if(!fbReady||!db)return;var id=s.fsId||('a_'+s.uid);s.fsId=id;db.collection('ptn_archived').doc(id).set(s).catch(function(){});}
 function logActivity(action,sampleId,detail){var who=currentUser?(currentUser.displayName||currentUser.email):'Khách';var e={action:action,sampleId:sampleId||'',detail:detail||'',who:who,at:new Date().toISOString()};var log=JSON.parse(localStorage.getItem('ptn_log')||'[]');log.unshift(e);if(log.length>300)log.length=300;localStorage.setItem('ptn_log',JSON.stringify(log));if(fbReady&&db)db.collection('ptn_activity_log').add(Object.assign({},e,{ts:firebase.firestore.FieldValue.serverTimestamp()})).catch(function(){});}
 
-// AUTH
 document.getElementById('auth-btn').addEventListener('click',function(){
   if(currentUser){fbAuth&&fbAuth.signOut();}
   else{document.getElementById('modal-auth').classList.add('open');}
@@ -660,9 +580,6 @@ function loadLocal(){samples=JSON.parse(localStorage.getItem('ptn3_samples')||'[
 function buildHkList(){var s={};samples.concat(archived).forEach(function(x){if(x.hk)s[x.hk]=1;});hkList=Object.keys(s);}
 
 loadLocal();renderSamples();renderArchive();updateStats();
-
-// Camera zones: mobile always shows capture button, PC shows file picker.
-// Both are always visible — CSS handles layout differences.
 
 function showSection(name,btn){document.querySelectorAll('.content-section').forEach(function(s){s.classList.remove('active');});document.querySelectorAll('.side-btn').forEach(function(b){b.classList.remove('active');});document.getElementById('section-'+name).classList.add('active');btn.classList.add('active');if(name==='archive')renderArchive();if(name==='today')renderToday();}
 function updateStats(){document.getElementById('stat-active').textContent=samples.length;document.getElementById('stat-done').textContent=archived.length;}
@@ -810,7 +727,10 @@ function toggleStep(uid,stepId,checked){
       s.steps[stepId]=true;
     }
   } else {
+    // ── FIX: untick + rebuild workflow để đồng bộ trạng thái ──
     s.steps[stepId]=false;
+    var body=document.getElementById('body-'+uid);
+    if(body){var wg3=body.querySelector('.workflow-grid');if(wg3)wg3.innerHTML=buildWorkflow(s);}
   }
   refreshCardProgress(s);
   saveLocal();syncSample(s);
@@ -871,7 +791,7 @@ function doArchive(uid){
   updateStats();deleteSampleDoc(s);syncArchived(s);logActivity('ARCHIVE_SAMPLE',s.id,'');renderArchive();
 }
 
-var archiveSel={}; // uid -> bool
+var archiveSel={};
 
 function renderArchive(){
   var list=document.getElementById('archive-list');
@@ -883,7 +803,6 @@ function renderArchive(){
     return;
   }
   bar.style.display='flex';
-  // Remove stale selection keys
   Object.keys(archiveSel).forEach(function(k){if(!archived.find(function(s){return s.uid==k;}))delete archiveSel[k];});
 
   list.innerHTML='';
@@ -1165,8 +1084,9 @@ function applyBulk(){
     branchesToComplete.forEach(function(b){b.steps.forEach(function(st){s.steps[st.id]=true;});});
     if(bkSteps['finish']){ALL_STEP_IDS.forEach(function(id){s.steps[id]=true;});}
     refreshCardProgress(s);
+    // ── FIX: rebuild workflow cho tất cả mẫu được chọn (kể cả đang đóng) ──
     var body=document.getElementById('body-'+s.uid);
-    if(body&&body.classList.contains('open')){var wg=body.querySelector('.workflow-grid');if(wg)wg.innerHTML=buildWorkflow(s);}
+    if(body){var wg=body.querySelector('.workflow-grid');if(wg)wg.innerHTML=buildWorkflow(s);}
     syncSample(s);
   });
   saveLocal();logActivity('BULK_TICK','',selS.length+'mẫu/'+selSt.length+'bước');
@@ -1300,9 +1220,7 @@ function resizeAndUpload(file, prefix, statusEl, logListEl, btnEl, previewEl){
   img.src=objUrl;
 }
 
-// ════════════════════════════════════
-// CAMERA — PC (file chooser, multiple)
-// ════════════════════════════════════
+// PC camera
 (function initPcCam(){
   var btn=document.getElementById('pc-upload-btn');
   var input=document.getElementById('pcFileInput');
@@ -1316,20 +1234,16 @@ function resizeAndUpload(file, prefix, statusEl, logListEl, btnEl, previewEl){
     var files=Array.from(input.files||[]);
     if(!files.length)return;
     strip.innerHTML='';
-    // If multiple files, process sequentially with small delay
     files.forEach(function(file,i){
-      // Tiny thumbnail preview
       var thumb=document.createElement('img');
       thumb.style.cssText='width:72px;height:72px;object-fit:cover;border:var(--border);border-radius:8px;';
       thumb.src=URL.createObjectURL(file);
       strip.appendChild(thumb);
-      // upload each file
       setTimeout(function(){
         resizeAndUpload(file,'pc',statusEl,logListEl,files.length===1?btn:null,null);
       },i*200);
     });
     if(files.length>1){
-      // re-enable btn after all uploads (rough estimate: 3s per file)
       btn.disabled=true;
       setTimeout(function(){btn.disabled=false;},files.length*3000);
     }
@@ -1337,9 +1251,7 @@ function resizeAndUpload(file, prefix, statusEl, logListEl, btnEl, previewEl){
   });
 })();
 
-// ════════════════════════════════════
-// CAMERA — MOBILE (camera capture)
-// ════════════════════════════════════
+// Mobile camera
 (function initMobileCam(){
   var btn=document.getElementById('mobile-cam-btn');
   var input=document.getElementById('cameraFileInput');

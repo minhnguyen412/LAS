@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="vi">
 <head>
 <meta charset="UTF-8"/>
@@ -173,6 +174,7 @@ header{background:var(--earth);border-bottom:var(--border-thick);padding:0 28px;
 .bulk-toolbar{display:flex;gap:6px;margin-bottom:8px;align-items:center;flex-wrap:wrap;}
 .cnt-badge{font-size:.74rem;font-weight:700;background:var(--earth-pale);border:var(--border);border-radius:50px;padding:3px 10px;margin-left:auto;}
 @keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 /* ── PROFILE MODAL ── */
 .profile-modal{width:600px;}
 .profile-hero{display:flex;align-items:center;gap:16px;padding:18px 20px;background:linear-gradient(135deg,var(--earth) 0%,var(--earth-dark) 100%);border-radius:14px;margin-bottom:18px;color:var(--white);}
@@ -354,106 +356,110 @@ header{background:var(--earth);border-bottom:var(--border-thick);padding:0 28px;
       </div>
     </div>
 
-    <!-- TODAY SUMMARY -->
-    <div class="content-section" id="section-today">
-      <div class="sec-header">
-        <div class="sec-title">📊 Tổng kết tiến độ</div>
-        <span id="today-date" style="font-size:.82rem;color:#aaa;font-weight:600;"></span>
-        <button class="btn btn-ghost btn-sm" onclick="renderToday()">↻ Làm mới</button>
-      </div>
-      <div id="today-kpi" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px;"></div>
-      <div style="background:var(--white);border:var(--border-thick);border-radius:14px;padding:16px 20px;margin-bottom:16px;box-shadow:var(--shadow-sm);">
-        <div id="today-overall"></div>
-      </div>
-      <div style="background:var(--white);border:var(--border-thick);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm);margin-bottom:16px;">
-        <div style="padding:12px 16px;font-weight:700;font-size:.88rem;border-bottom:var(--border);background:var(--earth-pale);">🧪 Tiến độ từng mẫu đang xử lý</div>
-        <div style="overflow-x:auto;">
-          <table style="width:100%;border-collapse:collapse;font-size:.82rem;">
-            <thead><tr id="today-table-head" style="background:var(--earth-pale);border-bottom:var(--border);"></tr></thead>
-            <tbody id="today-table-body"></tbody>
-          </table>
-        </div>
-      </div>
-      <div style="background:var(--white);border:var(--border-thick);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow-sm);">
-        <div style="font-weight:700;font-size:.88rem;margin-bottom:10px;">🏁 Lưu trữ hôm nay</div>
-        <div id="today-completed"></div>
-      </div>
+```
+<!-- TODAY SUMMARY -->
+<div class="content-section" id="section-today">
+  <div class="sec-header">
+    <div class="sec-title">📊 Tổng kết tiến độ</div>
+    <span id="today-date" style="font-size:.82rem;color:#aaa;font-weight:600;"></span>
+    <button class="btn btn-ghost btn-sm" onclick="renderToday()">↻ Làm mới</button>
+  </div>
+  <div id="today-kpi" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:16px;"></div>
+  <div style="background:var(--white);border:var(--border-thick);border-radius:14px;padding:16px 20px;margin-bottom:16px;box-shadow:var(--shadow-sm);">
+    <div id="today-overall"></div>
+  </div>
+  <div style="background:var(--white);border:var(--border-thick);border-radius:14px;overflow:hidden;box-shadow:var(--shadow-sm);margin-bottom:16px;">
+    <div style="padding:12px 16px;font-weight:700;font-size:.88rem;border-bottom:var(--border);background:var(--earth-pale);">🧪 Tiến độ từng mẫu đang xử lý</div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;font-size:.82rem;">
+        <thead><tr id="today-table-head" style="background:var(--earth-pale);border-bottom:var(--border);"></tr></thead>
+        <tbody id="today-table-body"></tbody>
+      </table>
     </div>
+  </div>
+  <div style="background:var(--white);border:var(--border-thick);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow-sm);">
+    <div style="font-weight:700;font-size:.88rem;margin-bottom:10px;">🏁 Lưu trữ hôm nay</div>
+    <div id="today-completed"></div>
+  </div>
+</div>
 
-    <!-- CAMERA -->
-    <div class="content-section" id="section-camera">
-      <div class="sec-header"><div class="sec-title">📸 Chụp ảnh</div></div>
-      <div id="mobile-cam-zone">
-        <div class="camera-panel">
-          <h3>📱 Camera điện thoại</h3>
-          <p style="font-size:.84rem;color:#888;margin-bottom:14px;line-height:1.6;">Nhấn nút bên dưới để mở camera, chụp ảnh xong ảnh sẽ tự động upload lên Google Drive.</p>
-          <input type="file" id="cameraFileInput" accept="image/*" capture="environment"/>
-          <button class="cam-snap-btn" id="mobile-cam-btn">📷 Chụp ảnh thí nghiệm</button>
-          <img id="mobile-preview" class="mobile-preview" alt="Ảnh vừa chụp"/>
-          <div id="upload-status" class="upload-status"></div>
-          <div id="mobile-log-list" style="margin-top:14px;display:flex;flex-direction:column;gap:6px;"></div>
-        </div>
-      </div>
-      <div id="pc-cam-zone">
-        <div class="camera-panel">
-          <h3>🖼️ Tải ảnh lên Drive (Máy tính)</h3>
-          <p style="font-size:.84rem;color:#888;margin-bottom:14px;line-height:1.6;">Chọn một hoặc nhiều ảnh từ máy tính để upload lên Google Drive.</p>
-          <input type="file" id="pcFileInput" accept="image/*" multiple style="display:none;"/>
-          <button class="cam-snap-btn" id="pc-upload-btn" style="max-width:360px;">🖼️ Chọn ảnh để upload</button>
-          <div id="pc-preview-strip" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
-          <div id="pc-upload-status" class="upload-status"></div>
-          <div id="pc-log-list" style="margin-top:14px;display:flex;flex-direction:column;gap:6px;"></div>
-        </div>
-        <div class="camera-panel">
-          <h3>📂 Google Drive</h3>
-          <div class="drive-links">
-            <a class="drive-link" href="https://drive.google.com/drive/folders/1yed3TBGnktmakcwekL60fOOOBgousdA_?usp=sharing" target="_blank">🖼️ Ảnh thí nghiệm</a>
-            <a class="drive-link" href="https://drive.google.com/drive/folders/1Onjlnxh62Br5QglU_YCJ67jG8JYt6nBn?usp=sharing" target="_blank">📋 Yêu cầu thí nghiệm</a>
-            <a class="drive-link" href="https://drive.google.com/drive/folders/11DVnrcLxa3NHv-Y23emDZ36Lob3BwB9N?usp=sharing" target="_blank">📊 Biểu nhập số liệu</a>
-          </div>
-        </div>
-      </div>
+<!-- CAMERA -->
+<div class="content-section" id="section-camera">
+  <div class="sec-header"><div class="sec-title">📸 Chụp ảnh</div></div>
+  <div id="mobile-cam-zone">
+    <div class="camera-panel">
+      <h3>📱 Camera điện thoại</h3>
+      <p style="font-size:.84rem;color:#888;margin-bottom:14px;line-height:1.6;">Nhấn nút bên dưới để mở camera, chụp ảnh xong ảnh sẽ tự động upload lên Google Drive.</p>
+      <input type="file" id="cameraFileInput" accept="image/*" capture="environment"/>
+      <button class="cam-snap-btn" id="mobile-cam-btn">📷 Chụp ảnh thí nghiệm</button>
+      <img id="mobile-preview" class="mobile-preview" alt="Ảnh vừa chụp"/>
+      <div id="upload-status" class="upload-status"></div>
+      <div id="mobile-log-list" style="margin-top:14px;display:flex;flex-direction:column;gap:6px;"></div>
     </div>
-
-    <!-- ARCHIVE -->
-    <div class="content-section" id="section-archive">
-      <div class="sec-header"><div class="sec-title">🗄️ Mẫu hoàn thành</div></div>
-      <div id="archive-bulk-bar" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;padding:10px 14px;background:var(--white);border:var(--border-thick);border-radius:12px;box-shadow:var(--shadow-sm);">
-        <button class="btn btn-ghost btn-sm" onclick="archiveBulkSelAll(true)">Chọn tất cả</button>
-        <button class="btn btn-ghost btn-sm" onclick="archiveBulkSelAll(false)">Bỏ chọn</button>
-        <span id="archive-sel-count" style="font-size:.78rem;font-weight:700;background:var(--earth-pale);border:var(--border);border-radius:50px;padding:3px 10px;">0 đã chọn</span>
-        <div style="flex:1;"></div>
-        <button class="btn btn-ghost btn-sm" onclick="archiveBulkRestore()" style="border-color:var(--sky);color:var(--sky);">↩ Phục hồi đã chọn</button>
-        <button class="btn btn-rust btn-sm" onclick="archiveBulkDeletePrompt()">🗑️ Xóa đã chọn</button>
-      </div>
-      <div id="archive-list"><div class="empty-state"><span class="e-icon">🗄️</span><h3>Chưa có mẫu hoàn thành</h3></div></div>
+  </div>
+  <div id="pc-cam-zone">
+    <div class="camera-panel">
+      <h3>🖼️ Tải ảnh lên Drive (Máy tính)</h3>
+      <p style="font-size:.84rem;color:#888;margin-bottom:14px;line-height:1.6;">Chọn một hoặc nhiều ảnh từ máy tính để upload lên Google Drive.</p>
+      <input type="file" id="pcFileInput" accept="image/*" multiple style="display:none;"/>
+      <button class="cam-snap-btn" id="pc-upload-btn" style="max-width:360px;">🖼️ Chọn ảnh để upload</button>
+      <div id="pc-preview-strip" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
+      <div id="pc-upload-status" class="upload-status"></div>
+      <div id="pc-log-list" style="margin-top:14px;display:flex;flex-direction:column;gap:6px;"></div>
     </div>
-
-    <!-- TRASH -->
-    <div class="content-section" id="section-trash">
-      <div class="sec-header">
-        <div class="sec-title">🗑️ Thùng rác</div>
-        <button class="btn btn-rust btn-sm" onclick="emptyTrashPrompt()">🗑️ Xóa vĩnh viễn tất cả</button>
-      </div>
-      <div class="hint-box" style="margin-bottom:14px;">
-        Mẫu ở đây đã bị xóa khỏi trang chính nhưng <b>chưa xóa khỏi Firestore</b>. Nhấn <b>Phục hồi</b> để đưa lại, hoặc <b>Xóa vĩnh viễn</b> để xóa hẳn khỏi cơ sở dữ liệu.
-      </div>
-      <div id="trash-list"><div class="empty-state"><span class="e-icon">🗑️</span><h3>Thùng rác trống</h3></div></div>
-    </div>
-
-    <!-- DOCS -->
-    <div class="content-section" id="section-docs">
-      <div class="sec-header"><div class="sec-title">📖 Tài liệu & Thiết bị</div></div>
-      <div class="doc-placeholder">
-        <div style="font-size:2.8rem;margin-bottom:10px;">🔧</div>
-        <p style="font-weight:700;font-size:1rem;color:#999;margin-bottom:8px;">Khu vực tài liệu thiết bị</p>
-        <p style="font-size:.85rem;">Sẽ bổ sung hướng dẫn vận hành thiết bị, quy trình chuẩn và danh mục.</p>
+    <div class="camera-panel">
+      <h3>📂 Google Drive</h3>
+      <div class="drive-links">
+        <a class="drive-link" href="https://drive.google.com/drive/folders/1yed3TBGnktmakcwekL60fOOOBgousdA_?usp=sharing" target="_blank">🖼️ Ảnh thí nghiệm</a>
+        <a class="drive-link" href="https://drive.google.com/drive/folders/1Onjlnxh62Br5QglU_YCJ67jG8JYt6nBn?usp=sharing" target="_blank">📋 Yêu cầu thí nghiệm</a>
+        <a class="drive-link" href="https://drive.google.com/drive/folders/11DVnrcLxa3NHv-Y23emDZ36Lob3BwB9N?usp=sharing" target="_blank">📊 Biểu nhập số liệu</a>
       </div>
     </div>
   </div>
 </div>
 
+<!-- ARCHIVE -->
+<div class="content-section" id="section-archive">
+  <div class="sec-header"><div class="sec-title">🗄️ Mẫu hoàn thành</div></div>
+  <div id="archive-bulk-bar" style="display:none;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;padding:10px 14px;background:var(--white);border:var(--border-thick);border-radius:12px;box-shadow:var(--shadow-sm);">
+    <button class="btn btn-ghost btn-sm" onclick="archiveBulkSelAll(true)">Chọn tất cả</button>
+    <button class="btn btn-ghost btn-sm" onclick="archiveBulkSelAll(false)">Bỏ chọn</button>
+    <span id="archive-sel-count" style="font-size:.78rem;font-weight:700;background:var(--earth-pale);border:var(--border);border-radius:50px;padding:3px 10px;">0 đã chọn</span>
+    <div style="flex:1;"></div>
+    <button class="btn btn-ghost btn-sm" onclick="archiveBulkRestore()" style="border-color:var(--sky);color:var(--sky);">↩ Phục hồi đã chọn</button>
+    <button class="btn btn-rust btn-sm" onclick="archiveBulkDeletePrompt()">🗑️ Xóa đã chọn</button>
+  </div>
+  <div id="archive-list"><div class="empty-state"><span class="e-icon">🗄️</span><h3>Chưa có mẫu hoàn thành</h3></div></div>
+</div>
+
+<!-- TRASH -->
+<div class="content-section" id="section-trash">
+  <div class="sec-header">
+    <div class="sec-title">🗑️ Thùng rác</div>
+    <button class="btn btn-rust btn-sm" onclick="emptyTrashPrompt()">🗑️ Xóa vĩnh viễn tất cả</button>
+  </div>
+  <div class="hint-box" style="margin-bottom:14px;">
+    Mẫu ở đây đã bị xóa khỏi trang chính nhưng <b>chưa xóa khỏi Firestore</b>. Nhấn <b>Phục hồi</b> để đưa lại, hoặc <b>Xóa vĩnh viễn</b> để xóa hẳn khỏi cơ sở dữ liệu.
+  </div>
+  <div id="trash-list"><div class="empty-state"><span class="e-icon">🗑️</span><h3>Thùng rác trống</h3></div></div>
+</div>
+
+<!-- DOCS -->
+<div class="content-section" id="section-docs">
+  <div class="sec-header"><div class="sec-title">📖 Tài liệu & Thiết bị</div></div>
+  <div class="doc-placeholder">
+    <div style="font-size:2.8rem;margin-bottom:10px;">🔧</div>
+    <p style="font-weight:700;font-size:1rem;color:#999;margin-bottom:8px;">Khu vực tài liệu thiết bị</p>
+    <p style="font-size:.85rem;">Sẽ bổ sung hướng dẫn vận hành thiết bị, quy trình chuẩn và danh mục.</p>
+  </div>
+</div>
+```
+
+  </div>
+</div>
+
 <!-- ADD / EDIT MODAL -->
+
 <div class="modal-overlay" id="modal-add" onclick="if(event.target===this)closeAddModal()">
   <div class="modal">
     <div class="modal-title" id="add-modal-title">🧪 Thêm mẫu thí nghiệm</div>
@@ -489,6 +495,7 @@ header{background:var(--earth);border-bottom:var(--border-thick);padding:0 28px;
 </div>
 
 <!-- IMPORT MODAL -->
+
 <div class="modal-overlay" id="modal-import" onclick="if(event.target===this)closeImportModal()">
   <div class="modal modal-xl">
     <div class="modal-title">📋 Import mẫu từ Excel</div>
@@ -528,6 +535,7 @@ header{background:var(--earth);border-bottom:var(--border-thick);padding:0 28px;
 </div>
 
 <!-- BULK TICK MODAL -->
+
 <div class="modal-overlay" id="modal-bulk" onclick="if(event.target===this)closeBulkModal()">
   <div class="modal modal-xl bulk-modal">
     <div class="modal-title">☑ Thao tác hàng loạt</div>
@@ -564,6 +572,7 @@ header{background:var(--earth);border-bottom:var(--border-thick);padding:0 28px;
 </div>
 
 <!-- AUTH MODAL -->
+
 <div class="modal-overlay" id="modal-auth" onclick="if(event.target===this)closeAuthModal()">
   <div class="auth-card">
     <div style="font-size:2rem;margin-bottom:10px;">🔐</div>
@@ -578,6 +587,7 @@ header{background:var(--earth);border-bottom:var(--border-thick);padding:0 28px;
 </div>
 
 <!-- CONFIRM -->
+
 <div class="confirm-overlay" id="confirm-overlay">
   <div class="confirm-box">
     <h4 id="confirm-title">🗄️ Xác nhận</h4>
@@ -590,6 +600,7 @@ header{background:var(--earth);border-bottom:var(--border-thick);padding:0 28px;
 </div>
 
 <!-- PROFILE MODAL -->
+
 <div class="modal-overlay" id="modal-profile" onclick="if(event.target===this)closeProfileModal()">
   <div class="modal profile-modal">
     <div class="modal-title" id="profile-modal-title">👤 Hoạt động cá nhân</div>
@@ -604,16 +615,31 @@ header{background:var(--earth);border-bottom:var(--border-thick);padding:0 28px;
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
 <script>
 var FB_CONFIG={apiKey:"AIzaSyCiLP0uKWKR3LkvvdaSabSxhzN9s6G7A6c",authDomain:"las-dashboard-522c4.firebaseapp.com",projectId:"las-dashboard-522c4",storageBucket:"las-dashboard-522c4.firebasestorage.app",messagingSenderId:"297545923187",appId:"1:297545923187:web:620d57ce99a5aea70f4806"};
 var db=null,fbAuth=null,currentUser=null,fbReady=false;
 var DEMO_MODE=false;
 var _firestoreLoaded=false;
+
+// Hiện loading spinner ngay khi trang load
+function showLoadingState(){
+  var list=document.getElementById('sample-list');
+  if(list)list.innerHTML='<div style="text-align:center;padding:48px 20px;color:#bbb;"><div style="font-size:1.8rem;margin-bottom:10px;animation:spin 1s linear infinite;display:inline-block;">⏳</div><div style="font-weight:700;font-size:.9rem;">Đang tải dữ liệu từ server...</div></div>';
+}
+function hideLoadingState(){
+  // renderSamples() sẽ tự thay thế nội dung
+}
+
 try{
   firebase.initializeApp(FB_CONFIG);
   db=firebase.firestore();
+  // Bật persistence để cache offline
+  db.enablePersistence({synchronizeTabs:true}).catch(function(){});
   fbAuth=firebase.auth();
   fbReady=true;
 
@@ -623,13 +649,16 @@ try{
       .catch(function(e){alert('Lỗi đăng nhập: '+e.message);});
   });
 
+  // Load Firestore NGAY LẬP TỨC — không chờ auth
+  if(!_firestoreLoaded){
+    _firestoreLoaded=true;
+    showLoadingState();
+    loadFromFirestore();
+  }
+
   fbAuth.onAuthStateChanged(function(u){
     currentUser=u||null;
     updateUserUI(u);
-    if(!_firestoreLoaded){
-      _firestoreLoaded=true;
-      loadFromFirestore();
-    }
   });
 }catch(e){console.warn('Firebase init error:',e);DEMO_MODE=true;}
 function loadFromFirestore(){
@@ -679,11 +708,11 @@ function updateUserUI(user){document.getElementById('user-name').textContent=use
 var samples=[],archived=[],trashed=[],hkList=[];
 var APPS_SCRIPT="https://script.google.com/macros/s/AKfycbyOT1qP3OTTXy-X6dRAJKuZS1HKTVVTqxMKgn3IxyiZks99kTcQcMiy0hiJ6QuCAUQ/exec";
 var BRANCHES=[
-  {key:'prep',  label:'Chuẩn bị',         color:'#c45020',steps:[{id:'s_start',l:'Chuẩn bị YCTN'},{id:'s_prep',l:'Soạn mẫu'},{id:'s_push',l:'Mở mẫu'}]},
+  {key:'prep',  label:'Chuẩn bị',         color:'#c45020',steps:[{id:'s_start',l:'Chuẩn bị yêu cầu thí nghiệm'},{id:'s_prep',l:'Soạn mẫu'},{id:'s_push',l:'Mở mẫu'}]},
   {key:'moist', label:'Độ ẩm',            color:'#5b8faa',steps:[{id:'m_wet',l:'Cân ướt'},{id:'m_dry',l:'Sấy khô'},{id:'m_wt',l:'Cân khô'}]},
-  {key:'ring',  label:'Dao vòng / Nén',   color:'#c17f24',steps:[{id:'dv_w',l:'Cân KL thể tích'},{id:'dv_cut',l:'Cắt 2 dao vòng'},{id:'dv_comp',l:'Lắp nén dao vòng'},{id:'dv_load',l:'Chất tải 4 cấp 24h'}]},
-  {key:'uc',    label:'Mẫu UC',           color:'#b06040',steps:[{id:'uc_prep',l:'Gia công'},{id:'uc_test',l:'Nén UC'}]},
-  {key:'grain', label:'Thành phần hạt',   color:'#7a9e3e',steps:[{id:'g_dry1',l:'Tủ sấy khô'},{id:'g_proc',l:'Đâm, xay, cân chia, emax, emin'},{id:'g_emax',l:'Rây chén'},{id:'g_ch',l:'Đọc tỷ trọng kế'},{id:'g_to',l:'Rây tô'},{id:'g_abc',l:'Sàng khô'}]},
+  {key:'ring',  label:'Dao vòng / Nén',   color:'#c17f24',steps:[{id:'dv_w',l:'Cân KL thể tích'},{id:'dv_cut',l:'Cắt 2 dao vòng lưu'},{id:'dv_comp',l:'Lắp nén dao vòng'},{id:'dv_load',l:'Chất tải 4 cấp 24h'}]},
+  {key:'uc',    label:'Mẫu UC',           color:'#b06040',steps:[{id:'uc_prep',l:'Gia công'},{id:'uc_test',l:'Nén đơn'}]},
+  {key:'grain', label:'Thành phần hạt',   color:'#7a9e3e',steps:[{id:'g_dry1',l:'Tủ sấy khô'},{id:'g_proc',l:'Đâm xay chia cân emax emin'},{id:'g_ch',l:'Rây chén'},{id:'g_to',l:'Rây tô'},{id:'g_tytrong',l:'Đọc tỷ trọng kế'},{id:'g_sang',l:'Sàng khô'}]},
   {key:'plastic',label:'Chảy dẻo',        color:'#8a5a10',steps:[{id:'p_dry1',l:'Phơi khô tự nhiên'},{id:'p_proc',l:'Đâm, xay, sàng, đánh mẫu'},{id:'p_test',l:'TN Chảy & Dẻo'},{id:'p_wet',l:'Cân ướt'},{id:'p_s',l:'Tủ sấy'},{id:'p_dry2',l:'Cân khô'}]},
   {key:'finish',label:'Tổng hợp & Trả KQ',color:'#4a8c30',steps:[{id:'finish',l:'✓ Tổng hợp & Trả kết quả'}]}
 ];
@@ -694,7 +723,10 @@ function saveLocal(){localStorage.setItem('ptn3_samples',JSON.stringify(samples)
 function loadLocal(){samples=JSON.parse(localStorage.getItem('ptn3_samples')||'[]');archived=JSON.parse(localStorage.getItem('ptn3_archived')||'[]');trashed=JSON.parse(localStorage.getItem('ptn3_trashed')||'[]');hkList=JSON.parse(localStorage.getItem('ptn3_hk')||'[]');}
 function buildHkList(){var s={};samples.concat(archived).forEach(function(x){if(x.hk)s[x.hk]=1;});hkList=Object.keys(s);}
 
-loadLocal();renderSamples();renderArchive();updateStats();updateTrashBadge();
+loadLocal(); // nạp vào bộ nhớ phòng khi Firestore lỗi
+// KHÔNG render ngay — để showLoadingState() và loadFromFirestore() xử lý
+// Nếu Firebase không khởi tạo được (DEMO_MODE) thì render từ local
+if(DEMO_MODE){renderSamples();renderArchive();updateStats();updateTrashBadge();}
 
 function showSection(name,btn){document.querySelectorAll('.content-section').forEach(function(s){s.classList.remove('active');});document.querySelectorAll('.side-btn').forEach(function(b){b.classList.remove('active');});document.getElementById('section-'+name).classList.add('active');btn.classList.add('active');if(name==='archive')renderArchive();if(name==='today')renderToday();if(name==='trash')renderTrash();}
 function updateStats(){document.getElementById('stat-active').textContent=samples.length;document.getElementById('stat-done').textContent=archived.length;}
@@ -1685,6 +1717,6 @@ function toggleDayGroup(headEl){
   if(arrow)arrow.classList.toggle('open',!isOpen);
 }
 </script>
+
 </body>
 </html>
-

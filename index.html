@@ -613,11 +613,6 @@ var db=null,fbAuth=null,currentUser=null,fbReady=false;
 var DEMO_MODE=false;
 var _firestoreLoaded=false;
 
-function showLoadingState(){
-  var list=document.getElementById('sample-list');
-  if(list)list.innerHTML='<div style="text-align:center;padding:48px 20px;color:#bbb;"><div style="font-size:1.8rem;margin-bottom:10px;animation:spin 1s linear infinite;display:inline-block;">⏳</div><div style="font-weight:700;font-size:.9rem;">Đang tải dữ liệu từ server...</div></div>';
-}
-
 try{
   firebase.initializeApp(FB_CONFIG);
   db=firebase.firestore();
@@ -700,7 +695,6 @@ function loadLocal(){samples=[];archived=[];trashed=[];hkList=[];}
 function buildHkList(){var s={};samples.concat(archived).forEach(function(x){if(x.hk)s[x.hk]=1;});hkList=Object.keys(s);}
 
 // Hiện spinner ngay, load Firestore ngay — không chờ auth
-showLoadingState();
 if(fbReady) loadFromFirestore();
 else { renderSamples();renderArchive();updateStats();updateTrashBadge(); }
 

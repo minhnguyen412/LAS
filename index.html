@@ -554,9 +554,10 @@ header{background:var(--earth);border-bottom:var(--border-thick);padding:0 28px;
     </div>
     <div class="bulk-action-bar">
       <span class="bar-label" id="b-preview">Chọn mẫu để thao tác</span>
-      <button class="btn btn-moss btn-sm" onclick="applyBulk()" title="Tick các công đoạn đã chọn">✓ Tick công đoạn</button>
-      <button class="btn btn-sky btn-sm" onclick="bulkArchive()" title="Đưa mẫu đã chọn vào lưu trữ">🗄️ Lưu trữ hàng loạt</button>
-      <button class="btn btn-rust btn-sm" onclick="bulkDelete()" title="Xóa mẫu đã chọn">🗑️ Xóa hàng loạt</button>
+      <button class="btn btn-moss btn-sm" onclick="applyBulk()" title="Tick các công đoạn đã chọn">✓ Tick</button>
+      <button class="btn btn-ghost btn-sm" onclick="applyBulkUntick()" title="Bỏ tick các công đoạn đã chọn" style="border-color:var(--rust);color:var(--rust);">✕ Bỏ tick</button>
+      <button class="btn btn-sky btn-sm" onclick="bulkArchive()" title="Đưa mẫu đã chọn vào lưu trữ">🗄️ Lưu trữ</button>
+      <button class="btn btn-rust btn-sm" onclick="bulkDelete()" title="Xóa mẫu đã chọn">🗑️ Xóa</button>
       <button class="btn btn-ghost btn-sm" onclick="closeBulkModal()">Đóng</button>
     </div>
   </div>
@@ -1310,8 +1311,8 @@ function updateBkCounts(){
   document.getElementById('b-stc').textContent=stc+' bước';
   var prev=document.getElementById('b-preview');
   if(!sc){prev.textContent='Chọn mẫu để thao tác';prev.style.color='#aaa';}
-  else if(stc){prev.textContent='→ Sẽ tick '+stc+' bước cho '+sc+' mẫu';prev.style.color='var(--moss)';}
-  else{prev.textContent=sc+' mẫu được chọn — chọn công đoạn để tick hoặc dùng nút bên phải';prev.style.color='var(--earth)';}
+  else if(stc){prev.textContent='→ '+stc+' bước × '+sc+' mẫu — Tick ✓ hoặc Bỏ tick ✕';prev.style.color='var(--moss)';}
+  else{prev.textContent=sc+' mẫu được chọn — chọn công đoạn để tick/bỏ tick hoặc dùng nút bên phải';prev.style.color='var(--earth)';}
 }
 
 function applyBulk(){
@@ -1332,7 +1333,6 @@ function applyBulk(){
     branchesToComplete.forEach(function(b){b.steps.forEach(function(st){s.steps[st.id]=true;});});
     if(bkSteps['finish']){ALL_STEP_IDS.forEach(function(id){s.steps[id]=true;});}
     refreshCardProgress(s);
-    // ── FIX: rebuild workflow cho tất cả mẫu được chọn (kể cả đang đóng) ──
     var body=document.getElementById('body-'+s.uid);
     if(body){var wg=body.querySelector('.workflow-grid');if(wg)wg.innerHTML=buildWorkflow(s);}
     syncSample(s);
@@ -1341,6 +1341,26 @@ function applyBulk(){
   renderBkSamples();updateBkCounts();
   selS.forEach(function(s){if(calcPct(s)===100)setTimeout(function(){closeBulkModal();archivePrompt(s.uid,true);},800);});
   alert('✅ Đã tick '+selSt.length+' bước cho '+selS.length+' mẫu!');
+}
+
+function applyBulkUntick(){
+  var selS=samples.filter(function(s){return bkSamples[s.uid];});
+  var selSt=ALL_STEP_IDS.filter(function(id){return bkSteps[id];});
+  if(!selS.length){alert('Chọn ít nhất 1 mẫu!');return;}
+  if(!selSt.length){alert('Chọn ít nhất 1 công đoạn để bỏ tick!');return;}
+  selS.forEach(function(s){
+    selSt.forEach(function(stepId){
+      s.steps[stepId]=false;
+    });
+    // Nếu bỏ tick bước cuối nhóm thì không cần untick cả nhóm — user tự quyết
+    refreshCardProgress(s);
+    var body=document.getElementById('body-'+s.uid);
+    if(body){var wg=body.querySelector('.workflow-grid');if(wg)wg.innerHTML=buildWorkflow(s);}
+    syncSample(s);
+  });
+  saveLocal();logActivity('BULK_UNTICK','',selS.length+'mẫu/'+selSt.length+'bước');
+  renderBkSamples();updateBkCounts();
+  alert('✅ Đã bỏ tick '+selSt.length+' bước cho '+selS.length+' mẫu!');
 }
 
 function bulkArchive(){

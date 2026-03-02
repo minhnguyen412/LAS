@@ -646,10 +646,6 @@ try{
   fbAuth.onAuthStateChanged(function(u){
     currentUser=u||null;
     updateUserUI(u);
-    if(!_firestoreLoaded){
-      _firestoreLoaded=true;
-      loadFromFirestore();
-    }
   });
 }catch(e){console.warn('Firebase init error:',e);DEMO_MODE=true;}
 function loadFromFirestore(){
@@ -710,11 +706,14 @@ var BRANCHES=[
 var ALL_STEP_IDS=BRANCHES.reduce(function(a,b){return a.concat(b.steps.map(function(s){return s.id;}));},[]);
 
 function calcPct(s){return Math.round(ALL_STEP_IDS.filter(function(id){return s.steps&&s.steps[id];}).length/ALL_STEP_IDS.length*100);}
-function saveLocal(){localStorage.setItem('ptn3_samples',JSON.stringify(samples));localStorage.setItem('ptn3_archived',JSON.stringify(archived));localStorage.setItem('ptn3_trashed',JSON.stringify(trashed));localStorage.setItem('ptn3_hk',JSON.stringify(hkList));}
-function loadLocal(){samples=JSON.parse(localStorage.getItem('ptn3_samples')||'[]');archived=JSON.parse(localStorage.getItem('ptn3_archived')||'[]');trashed=JSON.parse(localStorage.getItem('ptn3_trashed')||'[]');hkList=JSON.parse(localStorage.getItem('ptn3_hk')||'[]');}
+function saveLocal(){}  // không dùng localStorage nữa
+function loadLocal(){samples=[];archived=[];trashed=[];hkList=[];}
 function buildHkList(){var s={};samples.concat(archived).forEach(function(x){if(x.hk)s[x.hk]=1;});hkList=Object.keys(s);}
 
-loadLocal();renderSamples();renderArchive();updateStats();updateTrashBadge();
+// Hiện spinner ngay, load Firestore ngay — không chờ auth
+showLoadingState();
+if(fbReady) loadFromFirestore();
+else { renderSamples();renderArchive();updateStats();updateTrashBadge(); }
 
 function showSection(name,btn){document.querySelectorAll('.content-section').forEach(function(s){s.classList.remove('active');});document.querySelectorAll('.side-btn').forEach(function(b){b.classList.remove('active');});document.getElementById('section-'+name).classList.add('active');btn.classList.add('active');if(name==='archive')renderArchive();if(name==='today')renderToday();if(name==='trash')renderTrash();}
 function updateStats(){document.getElementById('stat-active').textContent=samples.length;document.getElementById('stat-done').textContent=archived.length;}
@@ -725,6 +724,15 @@ function updateStats(){document.getElementById('stat-active').textContent=sample
 var editingUid=null;
 function updateHkSelect(){var sel=document.getElementById('hk-select');sel.innerHTML='<option value="">— Chọn HK đã có —</option>';hkList.forEach(function(hk){var o=document.createElement('option');o.value=hk;o.textContent=hk;sel.appendChild(o);});}
 function onHkSelect(){if(document.getElementById('hk-select').value)document.getElementById('hk-new').value='';}
+
+function requireAuth(){
+  if(!currentUser){
+    alert('⚠️ Vui lòng đăng nhập để thực hiện thao tác này!');
+    document.getElementById('modal-auth').classList.add('open');
+    return false;
+  }
+  return true;
+}
 
 function openAddModal(){
   editingUid=null;
@@ -755,6 +763,7 @@ function openEditModal(uid){
 function closeAddModal(){document.getElementById('modal-add').classList.remove('open');editingUid=null;}
 
 function saveModalSample(){
+  if(!requireAuth())return;
   var hk=document.getElementById('hk-select').value||document.getElementById('hk-new').value.trim();
   var id=document.getElementById('f-id').value.trim();
   var code=document.getElementById('f-code').value.trim();
@@ -863,6 +872,13 @@ function toggleCard(uid){
 }
 
 function toggleStep(uid,stepId,checked){
+  if(!requireAuth()){
+    // revert checkbox visual
+    var wg=document.querySelector('#body-'+uid+' .workflow-grid');
+    var s=samples.find(function(x){return x.uid===uid;});
+    if(wg&&s)wg.innerHTML=buildWorkflow(s);
+    return;
+  }
   var s=samples.find(function(x){return x.uid===uid;});if(!s)return;
   if(checked){
     var branch=null;var stepIdx=-1;
@@ -1261,6 +1277,7 @@ function revalidateRow(i){if(!importData[i])return;renderImportTable();}
 function addImportRow(){importData.push({id:'',hk:'',code:'',depth:'',group:'',desc:'',types:[],typesRaw:''});renderImportTable();setTimeout(function(){var rows=document.getElementById('import-tbody').rows;if(rows.length)rows[rows.length-1].querySelector('input').focus();},50);}
 
 function doImport(){
+  if(!requireAuth())return;
   var existing=samples.concat(archived);var seen={};
   var toAdd=importData.filter(function(r,i){
     if(!r.id||!r.hk)return false;
@@ -1336,6 +1353,7 @@ function updateBkCounts(){
 }
 
 function applyBulk(){
+  if(!requireAuth())return;
   var selS=samples.filter(function(s){return bkSamples[s.uid];});
   var selSt=ALL_STEP_IDS.filter(function(id){return bkSteps[id];});
   if(!selS.length){alert('Chọn ít nhất 1 mẫu!');return;}
@@ -1364,6 +1382,7 @@ function applyBulk(){
 }
 
 function applyBulkUntick(){
+  if(!requireAuth())return;
   var selS=samples.filter(function(s){return bkSamples[s.uid];});
   var selSt=ALL_STEP_IDS.filter(function(id){return bkSteps[id];});
   if(!selS.length){alert('Chọn ít nhất 1 mẫu!');return;}

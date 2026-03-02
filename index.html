@@ -652,48 +652,50 @@ function loadFromFirestore(){
 }
 
 var _listenersStarted=false;
+var _pendingDelete={}; // uid đang bị xóa — listener bỏ qua
+
 function startRealtimeListeners(){
   if(_listenersStarted)return;
   _listenersStarted=true;
 
-  // Lắng nghe ptn_samples — cập nhật realtime khi ai tick/sửa
   db.collection('ptn_samples').onSnapshot(function(snapshot){
     snapshot.docChanges().forEach(function(change){
       var data=Object.assign({},change.doc.data(),{fsId:change.doc.id});
+      if(!data.uid)return;
       if(change.type==='added'||change.type==='modified'){
+        // Bỏ qua nếu uid này đang bị xóa
+        if(_pendingDelete[data.uid])return;
         var idx=samples.findIndex(function(s){return s.uid==data.uid;});
         if(idx>=0){
-          // Chỉ cập nhật nếu không phải do chính mình vừa save (tránh giật)
           samples[idx]=data;
-          // Cập nhật card nếu đang mở
           var body=document.getElementById('body-'+data.uid);
-          if(body){
-            var wg=body.querySelector('.workflow-grid');
-            if(wg)wg.innerHTML=buildWorkflow(data);
-          }
+          if(body){var wg=body.querySelector('.workflow-grid');if(wg)wg.innerHTML=buildWorkflow(data);}
           refreshCardProgress(data);
         } else {
-          samples.push(data);
-          renderSamples();
+          // Chỉ thêm mới nếu không phải do mình vừa xóa
+          if(!_pendingDelete[data.uid]){samples.push(data);renderSamples();}
         }
       } else if(change.type==='removed'){
         samples=samples.filter(function(s){return s.uid!=data.uid;});
         var card=document.getElementById('card-'+data.uid);
         if(card)card.remove();
+        delete _pendingDelete[data.uid];
       }
     });
     buildHkList();updateStats();
   },function(e){console.warn('samples listener error:',e);});
 
-  // Lắng nghe ptn_archived
   db.collection('ptn_archived').onSnapshot(function(snapshot){
     snapshot.docChanges().forEach(function(change){
       var data=Object.assign({},change.doc.data(),{fsId:change.doc.id});
+      if(!data.uid)return;
       if(change.type==='added'||change.type==='modified'){
+        if(_pendingDelete[data.uid])return;
         var idx=archived.findIndex(function(s){return s.uid==data.uid;});
         if(idx>=0)archived[idx]=data; else archived.push(data);
       } else if(change.type==='removed'){
         archived=archived.filter(function(s){return s.uid!=data.uid;});
+        delete _pendingDelete[data.uid];
       }
     });
     updateStats();
@@ -984,8 +986,7 @@ function doMoveToTrash(uid){
   s.deletedAt=new Date().toLocaleDateString('vi-VN');
   s.deletedAtISO=new Date().toISOString();
   trashed.push(s);
-  saveLocal();
-  // Xóa khỏi ptn_samples, ghi vào ptn_deleted
+  _pendingDelete[uid]=true; // báo listener bỏ qua uid này
   if(fbReady&&db){
     db.collection('ptn_samples').doc('s_'+s.uid).delete().catch(function(){});
     db.collection('ptn_deleted').doc('d_'+s.uid).set(s).catch(function(){});
@@ -1073,8 +1074,12 @@ function permDeletePrompt(uid){
   document.getElementById('confirm-ok-btn').textContent='✕ Xóa vĩnh viễn';
   confirmAction=function(){
     trashed=trashed.filter(function(x){return x.uid!==uid;});
-    saveLocal();
-    if(fbReady&&db)db.collection('ptn_deleted').doc('d_'+uid).delete().catch(function(){});
+    if(fbReady&&db){
+      // Xóa khỏi tất cả collection có thể chứa
+      db.collection('ptn_deleted').doc('d_'+uid).delete().catch(function(e){console.error('ptn_deleted delete error:',e);});
+      db.collection('ptn_samples').doc('s_'+uid).delete().catch(function(){});
+      db.collection('ptn_archived').doc('a_'+uid).delete().catch(function(){});
+    }
     logActivity('PERM_DELETE',s.id,'');
     renderTrash();updateTrashBadge();
   };
@@ -1088,10 +1093,14 @@ function emptyTrashPrompt(){
   document.getElementById('confirm-ok-btn').className='btn btn-rust';
   document.getElementById('confirm-ok-btn').textContent='✕ Xóa tất cả '+trashed.length+' mẫu';
   confirmAction=function(){
-    trashed.forEach(function(s){
-      if(fbReady&&db)db.collection('ptn_deleted').doc('d_'+s.uid).delete().catch(function(){});
-    });
-    trashed=[];saveLocal();logActivity('EMPTY_TRASH','','');
+    if(fbReady&&db){
+      trashed.forEach(function(s){
+        db.collection('ptn_deleted').doc('d_'+s.uid).delete().catch(function(e){console.error('emptyTrash delete error:',e);});
+        db.collection('ptn_samples').doc('s_'+s.uid).delete().catch(function(){});
+        db.collection('ptn_archived').doc('a_'+s.uid).delete().catch(function(){});
+      });
+    }
+    trashed=[];logActivity('EMPTY_TRASH','','');
     renderTrash();updateTrashBadge();
   };
   document.getElementById('confirm-overlay').classList.add('open');
@@ -1101,7 +1110,8 @@ function doArchive(uid){
   var idx=samples.findIndex(function(x){return x.uid===uid;});
   if(idx<0)return;
   var s=samples.splice(idx,1)[0];s.archivedAt=new Date().toLocaleDateString('vi-VN');
-  archived.push(s);saveLocal();
+  archived.push(s);
+  _pendingDelete[uid]=true; // báo listener bỏ qua — mẫu đang chuyển sang archived
   var card=document.getElementById('card-'+uid);if(card)card.remove();
   if(!samples.length)document.getElementById('empty-samples').style.display='block';
   updateStats();deleteSampleDoc(s);syncArchived(s);logActivity('ARCHIVE_SAMPLE',s.id,'');renderArchive();

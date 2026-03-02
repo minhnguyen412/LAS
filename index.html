@@ -173,6 +173,46 @@ header{background:var(--earth);border-bottom:var(--border-thick);padding:0 28px;
 .bulk-toolbar{display:flex;gap:6px;margin-bottom:8px;align-items:center;flex-wrap:wrap;}
 .cnt-badge{font-size:.74rem;font-weight:700;background:var(--earth-pale);border:var(--border);border-radius:50px;padding:3px 10px;margin-left:auto;}
 @keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+/* ── PROFILE MODAL ── */
+.profile-modal{width:600px;}
+.profile-hero{display:flex;align-items:center;gap:16px;padding:18px 20px;background:linear-gradient(135deg,var(--earth) 0%,var(--earth-dark) 100%);border-radius:14px;margin-bottom:18px;color:var(--white);}
+.profile-avatar{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.25);border:3px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;}
+.profile-name{font-size:1.05rem;font-weight:700;}
+.profile-sub{font-size:.78rem;opacity:.75;margin-top:2px;}
+.profile-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
+.profile-kpi{background:var(--earth-pale);border:var(--border);border-radius:10px;padding:10px 12px;text-align:center;}
+.profile-kpi .pk-val{font-size:1.4rem;font-weight:700;color:var(--earth-dark);line-height:1;}
+.profile-kpi .pk-lbl{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#aaa;margin-top:3px;}
+/* Day group accordion */
+.day-group{border:var(--border);border-radius:12px;overflow:hidden;margin-bottom:8px;}
+.day-group-head{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--earth-pale);cursor:pointer;user-select:none;transition:background .12s;}
+.day-group-head:hover{background:var(--earth-light);}
+.day-group-head.today-head{background:var(--earth);color:var(--white);}
+.day-group-head.today-head .dg-count{background:rgba(255,255,255,.25);color:var(--white);}
+.dg-date{font-weight:700;font-size:.9rem;flex:1;}
+.dg-count{background:var(--white);border:1.5px solid var(--black);border-radius:50px;padding:1px 9px;font-size:.72rem;font-weight:700;}
+.dg-arrow{font-size:.8rem;transition:transform .2s;flex-shrink:0;}
+.dg-arrow.open{transform:rotate(180deg);}
+.day-group-body{display:none;padding:10px 12px;display:flex;flex-direction:column;gap:5px;}
+.day-group-body.open{display:flex;}
+.act-row{display:flex;align-items:flex-start;gap:10px;padding:7px 10px;border-radius:8px;background:var(--white);border:1.5px solid #e8d8b8;font-size:.8rem;}
+.act-row:hover{border-color:var(--earth);}
+.act-icon{font-size:1rem;flex-shrink:0;width:22px;text-align:center;}
+.act-time{font-size:.7rem;color:#bbb;font-weight:600;white-space:nowrap;flex-shrink:0;margin-top:1px;}
+.act-body{flex:1;min-width:0;}
+.act-body b{font-weight:700;color:var(--black);}
+.act-body span{color:#888;}
+.act-badge{font-size:.65rem;font-weight:700;padding:1px 6px;border-radius:4px;white-space:nowrap;flex-shrink:0;}
+.act-badge.create{background:var(--moss-pale);color:var(--moss);}
+.act-badge.edit{background:rgba(91,143,170,.15);color:var(--sky);}
+.act-badge.archive{background:var(--earth-pale);color:var(--earth-dark);}
+.act-badge.delete{background:#ffe0e0;color:var(--rust);}
+.act-badge.tick{background:var(--moss-pale);color:var(--moss);}
+.act-badge.import{background:rgba(91,143,170,.15);color:var(--sky);}
+.act-badge.camera{background:#f0e8ff;color:#7040b0;}
+.act-badge.restore{background:var(--earth-pale);color:var(--earth-dark);}
+.profile-empty{text-align:center;padding:32px;color:#ccc;font-size:.85rem;}
+@media(max-width:760px){.profile-modal{width:95vw;}.profile-kpis{grid-template-columns:repeat(3,1fr);}}
 .dup-warn{background:#fff3cd;border-left:3px solid #c17f24;font-size:.74rem;padding:4px 8px;color:#7a4f00;}
 .row-dup td{background:#fff8e8!important;}
 .row-badge.dup{background:#fff3cd;color:#8a5a10;}
@@ -248,7 +288,7 @@ header{background:var(--earth);border-bottom:var(--border-thick);padding:0 28px;
 <header>
   <div class="logo">🔬 PTN LAB <span class="logo-badge">v8</span></div>
   <div class="header-right">
-    <div class="user-pill"><span class="anon-icon" id="user-avatar">👤</span><span id="user-name">Khách</span></div>
+    <div class="user-pill" id="user-pill-btn" onclick="openProfileModal()" style="cursor:pointer;" title="Xem hoạt động cá nhân"><span class="anon-icon" id="user-avatar">👤</span><span id="user-name">Khách</span></div>
     <button class="header-btn" id="auth-btn">Đăng nhập</button>
   </div>
 </header>
@@ -287,6 +327,17 @@ header{background:var(--earth);border-bottom:var(--border-thick);padding:0 28px;
           <option value="9ct">9CT</option><option value="7ct">7CT</option>
           <option value="uc">UC</option><option value="cv">CV</option>
           <option value="uu">UU</option><option value="cu">CU</option>
+        </select>
+        <select class="form-select" style="width:auto;border-radius:50px;padding:6px 12px;" id="sort-order" onchange="renderSamples()">
+          <option value="">— Sắp xếp —</option>
+          <option value="id-asc">Số hiệu A→Z</option>
+          <option value="id-desc">Số hiệu Z→A</option>
+          <option value="pct-asc">Tiến độ ↑ thấp→cao</option>
+          <option value="pct-desc">Tiến độ ↓ cao→thấp</option>
+          <option value="hk-asc">Hố khoan A→Z</option>
+          <option value="hk-desc">Hố khoan Z→A</option>
+          <option value="date-asc">Ngày tạo cũ→mới</option>
+          <option value="date-desc">Ngày tạo mới→cũ</option>
         </select>
       </div>
       <div class="sample-list" id="sample-list">
@@ -516,6 +567,20 @@ header{background:var(--earth);border-bottom:var(--border-thick);padding:0 28px;
   </div>
 </div>
 
+<!-- PROFILE MODAL -->
+<div class="modal-overlay" id="modal-profile" onclick="if(event.target===this)closeProfileModal()">
+  <div class="modal profile-modal">
+    <div class="modal-title" id="profile-modal-title">👤 Hoạt động cá nhân</div>
+    <div id="profile-hero-wrap"></div>
+    <div id="profile-kpi-wrap" class="profile-kpis"></div>
+    <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:#bbb;margin-bottom:8px;">📋 Lịch sử hoạt động</div>
+    <div id="profile-log-wrap" style="max-height:420px;overflow-y:auto;"></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:14px;">
+      <button class="btn btn-ghost btn-sm" onclick="closeProfileModal()">Đóng</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -649,11 +714,30 @@ function renderSamples(){
   var list=document.getElementById('sample-list');
   var q=(document.getElementById('search-box').value||'').toLowerCase();
   var ft=document.getElementById('filter-type').value||'';
+  var so=document.getElementById('sort-order')?document.getElementById('sort-order').value:'';
   var filtered=samples.filter(function(s){
     var m=!q||[s.hk,s.id,s.code,s.desc,s.depth].some(function(v){return (v||'').toLowerCase().includes(q);});
     var t=!ft||(s.types||[]).includes(ft);
     return m&&t;
   });
+  // Sort
+  if(so){
+    filtered=filtered.slice().sort(function(a,b){
+      if(so==='id-asc')return (a.id||'').localeCompare(b.id||'',undefined,{numeric:true,sensitivity:'base'});
+      if(so==='id-desc')return (b.id||'').localeCompare(a.id||'',undefined,{numeric:true,sensitivity:'base'});
+      if(so==='pct-asc')return calcPct(a)-calcPct(b);
+      if(so==='pct-desc')return calcPct(b)-calcPct(a);
+      if(so==='hk-asc')return (a.hk||'').localeCompare(b.hk||'',undefined,{numeric:true,sensitivity:'base'});
+      if(so==='hk-desc')return (b.hk||'').localeCompare(a.hk||'',undefined,{numeric:true,sensitivity:'base'});
+      if(so==='date-asc'||so==='date-desc'){
+        // createdAt is dd/mm/yyyy — parse to comparable
+        function parseDate(s){var p=(s||'').split('/');return p.length===3?new Date(p[2],p[1]-1,p[0]):new Date(0);}
+        var da=parseDate(a.createdAt),db=parseDate(b.createdAt);
+        return so==='date-asc'?da-db:db-da;
+      }
+      return 0;
+    });
+  }
   list.querySelectorAll('.sample-item').forEach(function(el){el.remove();});
   document.getElementById('empty-samples').style.display=filtered.length?'none':'block';
   filtered.forEach(function(s){list.appendChild(buildCard(s));});
@@ -1268,6 +1352,150 @@ function resizeAndUpload(file, prefix, statusEl, logListEl, btnEl, previewEl){
     input.value='';
   });
 })();
+
+// ════════════════════════════════════
+// PROFILE MODAL — Activity Log
+// ════════════════════════════════════
+function openProfileModal(){
+  renderProfileModal();
+  document.getElementById('modal-profile').classList.add('open');
+}
+function closeProfileModal(){document.getElementById('modal-profile').classList.remove('open');}
+
+var ACTION_META={
+  'CREATE_SAMPLE':{icon:'➕',label:'Tạo mẫu',badge:'create'},
+  'EDIT_SAMPLE':{icon:'✏️',label:'Sửa mẫu',badge:'edit'},
+  'ARCHIVE_SAMPLE':{icon:'🗄️',label:'Lưu trữ',badge:'archive'},
+  'DELETE_SAMPLE':{icon:'🗑️',label:'Xóa mẫu',badge:'delete'},
+  'BULK_TICK':{icon:'☑',label:'Tick hàng loạt',badge:'tick'},
+  'BRANCH_COMPLETE':{icon:'✅',label:'Hoàn thành nhóm',badge:'tick'},
+  'FINISH_SAMPLE':{icon:'🏁',label:'Hoàn thành mẫu',badge:'tick'},
+  'IMPORT_EXCEL':{icon:'📋',label:'Import Excel',badge:'import'},
+  'CAMERA_UPLOAD':{icon:'📷',label:'Upload ảnh',badge:'camera'},
+  'RESTORE_SAMPLE':{icon:'↩',label:'Phục hồi',badge:'restore'},
+  'BULK_ARCHIVE':{icon:'🗄️',label:'Lưu trữ loạt',badge:'archive'},
+  'BULK_DELETE':{icon:'🗑️',label:'Xóa loạt',badge:'delete'},
+};
+
+function formatActivityDetail(e){
+  var meta=ACTION_META[e.action]||{icon:'📌',label:e.action,badge:'edit'};
+  var samplePart=e.sampleId?'<b>'+e.sampleId+'</b> ':'';
+  var detailPart=e.detail?'<span>'+e.detail+'</span>':'';
+  return {icon:meta.icon,label:meta.label,badge:meta.badge,body:samplePart+detailPart};
+}
+
+function parseLogDate(isoStr){
+  // Returns Date object from ISO string
+  try{return new Date(isoStr);}catch(e){return new Date(0);}
+}
+
+function isoToLocaleDateStr(isoStr){
+  var d=parseLogDate(isoStr);
+  return d.toLocaleDateString('vi-VN');
+}
+
+function isoToTimeStr(isoStr){
+  var d=parseLogDate(isoStr);
+  return d.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
+}
+
+function renderProfileModal(){
+  var who=currentUser?(currentUser.displayName||currentUser.email||'Khách'):'Khách';
+  var avatar=currentUser&&currentUser.photoURL?'<img src="'+currentUser.photoURL+'" style="width:52px;height:52px;border-radius:50%;border:3px solid rgba(255,255,255,.5);object-fit:cover;" />'
+    :'<span style="font-size:1.6rem;">👤</span>';
+
+  // Hero
+  document.getElementById('profile-hero-wrap').innerHTML=
+    '<div class="profile-hero">'+
+      '<div class="profile-avatar">'+avatar+'</div>'+
+      '<div>'+
+        '<div class="profile-name">'+who+'</div>'+
+        '<div class="profile-sub">'+(currentUser?currentUser.email:'Chưa đăng nhập — hoạt động ghi cục bộ')+'</div>'+
+      '</div>'+
+    '</div>';
+
+  // Load log — filter by current user
+  var rawLog=JSON.parse(localStorage.getItem('ptn_log')||'[]');
+  var myLog=rawLog.filter(function(e){
+    if(!currentUser)return true; // guest sees all guest activity
+    var whoLog=e.who||'';
+    var myName=(currentUser.displayName||currentUser.email||'').split(' ').pop();
+    return whoLog===currentUser.displayName||whoLog===currentUser.email||whoLog===myName;
+  });
+
+  // KPIs
+  var todayStr=new Date().toLocaleDateString('vi-VN');
+  var todayLog=myLog.filter(function(e){return isoToLocaleDateStr(e.at)===todayStr;});
+  var totalActions=myLog.length;
+  var createdCount=myLog.filter(function(e){return e.action==='CREATE_SAMPLE'||e.action==='IMPORT_EXCEL';}).length;
+  var archivedCount=myLog.filter(function(e){return e.action==='ARCHIVE_SAMPLE'||e.action==='BULK_ARCHIVE';}).length;
+  document.getElementById('profile-kpi-wrap').innerHTML=
+    '<div class="profile-kpi"><div class="pk-val">'+todayLog.length+'</div><div class="pk-lbl">Hôm nay</div></div>'+
+    '<div class="profile-kpi"><div class="pk-val">'+createdCount+'</div><div class="pk-lbl">Đã tạo mẫu</div></div>'+
+    '<div class="profile-kpi"><div class="pk-val">'+archivedCount+'</div><div class="pk-lbl">Đã lưu trữ</div></div>';
+
+  // Group by date
+  var groups={};
+  myLog.forEach(function(e){
+    var d=isoToLocaleDateStr(e.at);
+    if(!groups[d])groups[d]=[];
+    groups[d].push(e);
+  });
+
+  var wrap=document.getElementById('profile-log-wrap');
+  if(!myLog.length){
+    wrap.innerHTML='<div class="profile-empty">📭 Chưa có hoạt động nào được ghi lại</div>';
+    return;
+  }
+
+  // Sort dates newest first
+  var dates=Object.keys(groups).sort(function(a,b){
+    function pd(s){var p=s.split('/');return p.length===3?new Date(p[2],p[1]-1,p[0]):new Date(0);}
+    return pd(b)-pd(a);
+  });
+
+  wrap.innerHTML='';
+  dates.forEach(function(dateStr,idx){
+    var isToday=dateStr===todayStr;
+    var events=groups[dateStr];
+    var groupEl=document.createElement('div');
+    groupEl.className='day-group';
+
+    var weekdays=['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];
+    function pdLabel(s){var p=s.split('/');return p.length===3?new Date(p[2],p[1]-1,p[0]):new Date(0);}
+    var wday=isToday?'Hôm nay':weekdays[pdLabel(dateStr).getDay()];
+
+    groupEl.innerHTML=
+      '<div class="day-group-head'+(isToday?' today-head':'')+'" onclick="toggleDayGroup(this)">'+
+        '<span class="dg-date">'+wday+' — '+dateStr+'</span>'+
+        '<span class="dg-count">'+events.length+' hoạt động</span>'+
+        '<span class="dg-arrow'+(isToday?' open':'')+'">▼</span>'+
+      '</div>'+
+      '<div class="day-group-body'+(isToday?' open':'')+'"></div>';
+
+    var bodyEl=groupEl.querySelector('.day-group-body');
+    events.forEach(function(e){
+      var f=formatActivityDetail(e);
+      var row=document.createElement('div');row.className='act-row';
+      row.innerHTML=
+        '<span class="act-icon">'+f.icon+'</span>'+
+        '<div class="act-body">'+f.body+'</div>'+
+        '<span class="act-badge '+f.badge+'">'+f.label+'</span>'+
+        '<span class="act-time">'+isoToTimeStr(e.at)+'</span>';
+      bodyEl.appendChild(row);
+    });
+
+    wrap.appendChild(groupEl);
+  });
+}
+
+function toggleDayGroup(headEl){
+  var body=headEl.nextElementSibling;
+  var arrow=headEl.querySelector('.dg-arrow');
+  var isOpen=body.classList.contains('open');
+  body.classList.toggle('open',!isOpen);
+  if(arrow)arrow.classList.toggle('open',!isOpen);
+}
 </script>
 </body>
 </html>

@@ -623,14 +623,22 @@ function loadFromFirestore(){
       buildHkList();renderSamples();renderArchive();updateStats();
     }).catch(function(e){console.warn('Firestore:',e);});
 }
-function syncSample(s){if(!fbReady||!db)return;var id=s.fsId||('s_'+s.uid);s.fsId=id;db.collection('ptn_samples').doc(id).set(Object.assign({},s,{updatedAt:firebase.firestore.FieldValue.serverTimestamp()})).catch(function(){});}
+function syncSample(s){
+  if(!fbReady||!db)return;
+  var id='s_'+s.uid; s.fsId=id;
+  db.collection('ptn_samples').doc(id).set(Object.assign({},s,{updatedAt:firebase.firestore.FieldValue.serverTimestamp()})).catch(function(){});
+}
+function syncArchived(s){
+  if(!fbReady||!db)return;
+  var id='a_'+s.uid; s.fsId=id;
+  db.collection('ptn_archived').doc(id).set(s).catch(function(){});
+}
 function deleteSampleDoc(s){
   if(!fbReady||!db)return;
-  // Xóa khỏi CẢ HAI collection để không bị load lại khi refresh
-  db.collection('ptn_samples').doc(s.fsId||('s_'+s.uid)).delete().catch(function(){});
-  db.collection('ptn_archived').doc(s.fsId||('a_'+s.uid)).delete().catch(function(){});
+  // Xóa khỏi CẢ HAI collection với đúng prefix — s_ cho samples, a_ cho archived
+  db.collection('ptn_samples').doc('s_'+s.uid).delete().catch(function(){});
+  db.collection('ptn_archived').doc('a_'+s.uid).delete().catch(function(){});
 }
-function syncArchived(s){if(!fbReady||!db)return;var id=s.fsId||('a_'+s.uid);s.fsId=id;db.collection('ptn_archived').doc(id).set(s).catch(function(){});}
 function logActivity(action,sampleId,detail){var who=currentUser?(currentUser.displayName||currentUser.email):'Khách';var e={action:action,sampleId:sampleId||'',detail:detail||'',who:who,at:new Date().toISOString()};var log=JSON.parse(localStorage.getItem('ptn_log')||'[]');log.unshift(e);if(log.length>300)log.length=300;localStorage.setItem('ptn_log',JSON.stringify(log));if(fbReady&&db)db.collection('ptn_activity_log').add(Object.assign({},e,{ts:firebase.firestore.FieldValue.serverTimestamp()})).catch(function(){});}
 
 document.getElementById('auth-btn').addEventListener('click',function(){

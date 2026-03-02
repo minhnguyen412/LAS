@@ -643,20 +643,73 @@ function loadFromFirestore(){
     r[2].forEach(function(d){fD.push(Object.assign({},d.data(),{fsId:d.id}));});
     samples=fS; archived=fA; trashed=fD;
     buildHkList();renderSamples();renderArchive();updateStats();updateTrashBadge();
+    // Sau khi load xong, bật realtime listener
+    startRealtimeListeners();
   }).catch(function(e){
     console.warn('Firestore load error:',e);
     renderSamples();renderArchive();updateStats();updateTrashBadge();
   });
 }
+
+var _listenersStarted=false;
+function startRealtimeListeners(){
+  if(_listenersStarted)return;
+  _listenersStarted=true;
+
+  // Lắng nghe ptn_samples — cập nhật realtime khi ai tick/sửa
+  db.collection('ptn_samples').onSnapshot(function(snapshot){
+    snapshot.docChanges().forEach(function(change){
+      var data=Object.assign({},change.doc.data(),{fsId:change.doc.id});
+      if(change.type==='added'||change.type==='modified'){
+        var idx=samples.findIndex(function(s){return s.uid==data.uid;});
+        if(idx>=0){
+          // Chỉ cập nhật nếu không phải do chính mình vừa save (tránh giật)
+          samples[idx]=data;
+          // Cập nhật card nếu đang mở
+          var body=document.getElementById('body-'+data.uid);
+          if(body){
+            var wg=body.querySelector('.workflow-grid');
+            if(wg)wg.innerHTML=buildWorkflow(data);
+          }
+          refreshCardProgress(data);
+        } else {
+          samples.push(data);
+          renderSamples();
+        }
+      } else if(change.type==='removed'){
+        samples=samples.filter(function(s){return s.uid!=data.uid;});
+        var card=document.getElementById('card-'+data.uid);
+        if(card)card.remove();
+      }
+    });
+    buildHkList();updateStats();
+  },function(e){console.warn('samples listener error:',e);});
+
+  // Lắng nghe ptn_archived
+  db.collection('ptn_archived').onSnapshot(function(snapshot){
+    snapshot.docChanges().forEach(function(change){
+      var data=Object.assign({},change.doc.data(),{fsId:change.doc.id});
+      if(change.type==='added'||change.type==='modified'){
+        var idx=archived.findIndex(function(s){return s.uid==data.uid;});
+        if(idx>=0)archived[idx]=data; else archived.push(data);
+      } else if(change.type==='removed'){
+        archived=archived.filter(function(s){return s.uid!=data.uid;});
+      }
+    });
+    updateStats();
+  },function(e){console.warn('archived listener error:',e);});
+}
 function syncSample(s){
   if(!fbReady||!db)return;
   var id='s_'+s.uid; s.fsId=id;
-  db.collection('ptn_samples').doc(id).set(Object.assign({},s,{updatedAt:firebase.firestore.FieldValue.serverTimestamp()})).catch(function(){});
+  // Dùng set() với merge:true để không ghi đè dữ liệu người khác đang sửa đồng thời
+  var data=Object.assign({},s,{updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+  db.collection('ptn_samples').doc(id).set(data,{merge:true}).catch(function(e){console.warn('syncSample error:',e);});
 }
 function syncArchived(s){
   if(!fbReady||!db)return;
   var id='a_'+s.uid; s.fsId=id;
-  db.collection('ptn_archived').doc(id).set(s).catch(function(){});
+  db.collection('ptn_archived').doc(id).set(s,{merge:true}).catch(function(e){console.warn('syncArchived error:',e);});
 }
 function deleteSampleDoc(s){
   if(!fbReady||!db)return;

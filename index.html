@@ -610,9 +610,26 @@ try{
     }
   });
 }catch(e){console.warn('Firebase init error:',e);DEMO_MODE=true;}
-function loadFromFirestore(){if(!fbReady||!db)return;Promise.all([db.collection('ptn_samples').get(),db.collection('ptn_archived').get()]).then(function(r){var fS=[],fA=[];r[0].forEach(function(d){fS.push(Object.assign({},d.data(),{fsId:d.id}));});r[1].forEach(function(d){fA.push(Object.assign({},d.data(),{fsId:d.id}));});if(fS.length||fA.length){samples=fS;archived=fA;buildHkList();renderSamples();renderArchive();updateStats();}}).catch(function(e){console.warn('Firestore:',e);});}
+function loadFromFirestore(){
+  if(!fbReady||!db)return;
+  Promise.all([db.collection('ptn_samples').get(),db.collection('ptn_archived').get()])
+    .then(function(r){
+      var fS=[],fA=[];
+      r[0].forEach(function(d){fS.push(Object.assign({},d.data(),{fsId:d.id}));});
+      r[1].forEach(function(d){fA.push(Object.assign({},d.data(),{fsId:d.id}));});
+      // Always overwrite local with Firestore — even when empty (fixes ghost-after-delete bug)
+      samples=fS; archived=fA;
+      saveLocal();
+      buildHkList();renderSamples();renderArchive();updateStats();
+    }).catch(function(e){console.warn('Firestore:',e);});
+}
 function syncSample(s){if(!fbReady||!db)return;var id=s.fsId||('s_'+s.uid);s.fsId=id;db.collection('ptn_samples').doc(id).set(Object.assign({},s,{updatedAt:firebase.firestore.FieldValue.serverTimestamp()})).catch(function(){});}
-function deleteSampleDoc(s){if(!fbReady||!db)return;db.collection('ptn_samples').doc(s.fsId||('s_'+s.uid)).delete().catch(function(){});}
+function deleteSampleDoc(s){
+  if(!fbReady||!db)return;
+  // Xóa khỏi CẢ HAI collection để không bị load lại khi refresh
+  db.collection('ptn_samples').doc(s.fsId||('s_'+s.uid)).delete().catch(function(){});
+  db.collection('ptn_archived').doc(s.fsId||('a_'+s.uid)).delete().catch(function(){});
+}
 function syncArchived(s){if(!fbReady||!db)return;var id=s.fsId||('a_'+s.uid);s.fsId=id;db.collection('ptn_archived').doc(id).set(s).catch(function(){});}
 function logActivity(action,sampleId,detail){var who=currentUser?(currentUser.displayName||currentUser.email):'Khách';var e={action:action,sampleId:sampleId||'',detail:detail||'',who:who,at:new Date().toISOString()};var log=JSON.parse(localStorage.getItem('ptn_log')||'[]');log.unshift(e);if(log.length>300)log.length=300;localStorage.setItem('ptn_log',JSON.stringify(log));if(fbReady&&db)db.collection('ptn_activity_log').add(Object.assign({},e,{ts:firebase.firestore.FieldValue.serverTimestamp()})).catch(function(){});}
 
@@ -964,7 +981,14 @@ function archiveBulkDeletePrompt(){
   document.getElementById('confirm-overlay').classList.add('open');
 }
 
-function restoreSample(uid){var idx=archived.findIndex(function(s){return s.uid===uid;});if(idx<0)return;var s=archived.splice(idx,1)[0];delete s.archivedAt;samples.push(s);saveLocal();syncSample(s);renderSamples();renderArchive();updateStats();}
+function restoreSample(uid){
+  var idx=archived.findIndex(function(s){return s.uid===uid;});if(idx<0)return;
+  var s=archived.splice(idx,1)[0];
+  // Xóa khỏi ptn_archived trên Firestore
+  if(fbReady&&db)db.collection('ptn_archived').doc(s.fsId||('a_'+uid)).delete().catch(function(){});
+  delete s.archivedAt;
+  samples.push(s);saveLocal();syncSample(s);renderSamples();renderArchive();updateStats();
+}
 
 function deleteArchivedPrompt(uid){
   var s=archived.find(function(x){return x.uid===uid;});if(!s)return;

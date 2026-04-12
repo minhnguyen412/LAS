@@ -1358,6 +1358,47 @@ header{
           <div id="pc-upload-status" class="upload-status"></div>
           <div id="pc-log-list" style="margin-top:12px;display:flex;flex-direction:column;gap:5px;"></div>
         </div>
+        <div class="camera-panel" style="border-top: 3px solid var(--rust); position: relative; overflow: hidden;">
+          <div style="position: absolute; top: 10px; right: -30px; background: var(--rust); color: white; padding: 5px 40px; transform: rotate(45deg); font-size: 0.6rem; font-weight: 700;">DỊCH VỤ</div>
+          <h3>🎨 Dịch vụ Photoshop hình ảnh</h3>
+          <p style="font-size:.78rem; color:var(--text-muted); margin-bottom:12px;">Chỉnh sửa độ sáng, cắt cúp mẫu, làm sạch phông nền thí nghiệm chuẩn báo cáo.</p>
+    
+          <div style="background: var(--earth-pale); border: 1px dashed var(--earth); padding: 12px; border-radius: var(--r-md); margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: .82rem; font-weight: 600;">Số lượng ảnh cần sửa:</span>
+              <input type="number" id="ps-quantity" value="1" min="1" oninput="calculatePsTotal()" style="width: 60px; padding: 4px; border: var(--border); border-radius: var(--r-sm); text-align: center; font-family: var(--font-mono);">
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: .82rem; font-weight: 600;">Đơn giá:</span>
+              <span style="font-family: var(--font-mono); font-weight: 700;">2.000đ / tấm</span>
+            </div>
+            <hr style="border: none; border-top: 1px solid rgba(193,127,36,.2); margin: 8px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: .85rem; font-weight: 700; color: var(--rust);">TỔNG CỘNG:</span>
+              <span id="ps-total-price" style="font-size: 1.1rem; font-weight: 700; color: var(--rust); font-family: var(--font-mono);">2.000đ</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Yêu cầu chỉnh sửa (Nếu có)</label>
+            <textarea id="ps-request-note" class="form-input" style="height: 60px; resize: none;" placeholder="Ví dụ: Làm sáng mẫu số 5, xóa nền rác..."></textarea>
+          </div>
+
+          <button class="cam-snap-btn" id="ps-submit-btn" onclick="submitPsOrder()" style="background: var(--sky); border-color: #2d5470;">🚀 Gửi yêu cầu & Thanh toán</button>
+        </div>
+
+        <div class="modal-overlay" id="modal-payment" onclick="if(event.target===this)this.classList.remove('open')">
+          <div class="modal" style="width: 340px; text-align: center;">
+            <div class="modal-title">Quét mã thanh toán</div>
+            <p style="font-size: .75rem; margin-bottom: 15px; color: var(--text-muted);">Vui lòng thanh toán để kích hoạt dịch vụ Photoshop</p>
+            <div style="background: #fff; padding: 10px; border-radius: var(--r-md); display: inline-block; border: var(--border-md);">
+              <img id="qr-code-img" src="" alt="QR Thanh toán" style="width: 240px; height: 240px; display: block;">
+            </div>
+            <div style="margin-top: 15px; font-weight: 700; font-family: var(--font-mono); color: var(--rust);" id="qr-price"></div>
+            <p style="font-size: .65rem; color: #999; margin-top: 10px;">Hệ thống sẽ gửi thông báo đến geolabdata@gmail.com ngay khi bạn nhấn xác nhận.</p>
+            <button class="btn btn-primary" style="width: 100%; margin-top: 15px;" onclick="confirmPsPayment()">✓ Tôi đã thanh toán</button>
+          </div>
+        </div>
         <div class="camera-panel">
           <h3>📂 Google Drive</h3>
           <div class="drive-links">
@@ -2158,6 +2199,62 @@ updateStats=function(){
   _bdOrigUpdateStats.apply(this,arguments);
   if(document.getElementById('section-today')&&document.getElementById('section-today').classList.contains('active'))renderBoard();
 };
+// 1. Tính tiền Photoshop
+function calculatePsTotal() {
+    var qty = parseInt(document.getElementById('ps-quantity').value) || 0;
+    var total = qty * 2000;
+    document.getElementById('ps-total-price').textContent = total.toLocaleString('vi-VN') + 'đ';
+    return total;
+}
+
+// 2. Gửi yêu cầu
+function submitPsOrder() {
+    var qty = document.getElementById('ps-quantity').value;
+    var note = document.getElementById('ps-request-note').value;
+    var total = calculatePsTotal();
+    var who = currentUser ? (currentUser.displayName || currentUser.email) : 'Khách ẩn danh';
+
+    if (qty < 1) {
+        alert('Vui lòng chọn số lượng tấm ảnh!');
+        return;
+    }
+
+    // Tạo QR Code động (Sử dụng API VietQR miễn phí)
+    // Thay STK_CUA_BAN, TEN_NGAN_HANG bằng thông tin thực tế của bạn
+    var bankID = "MB"; // Ví dụ MB Bank
+    var accountNo = "0901234567"; // Số điện thoại hoặc số tài khoản
+    var description = encodeURIComponent("PTS " + qty + " tam - " + who);
+    var qrUrl = `https://img.vietqr.io/image/${bankID}-${accountNo}-compact2.png?amount=${total}&addInfo=${description}`;
+    
+    document.getElementById('qr-code-img').src = qrUrl;
+    document.getElementById('qr-price').textContent = "Số tiền: " + total.toLocaleString('vi-VN') + "đ";
+    document.getElementById('modal-payment').classList.add('open');
+
+    // Gửi thông báo ngầm qua Email (Sử dụng Apps Script hiện có của bạn)
+    var payload = {
+        action: "PHOTOSHOP_REQUEST",
+        user: who,
+        quantity: qty,
+        note: note,
+        total: total,
+        targetEmail: "geolabdata@gmail.com"
+    };
+
+    fetch(APPS_SCRIPT, {
+        method: 'POST',
+        body: new URLSearchParams({
+            image: "REQUEST_ONLY", // Đánh dấu đây là tin nhắn yêu cầu, không phải ảnh
+            filename: `REQ_PS_${Date.now()}.txt`,
+            details: JSON.stringify(payload)
+        })
+    }).catch(err => console.warn("Email notify failed", err));
+}
+
+function confirmPsPayment() {
+    alert("Cảm ơn bạn! Yêu cầu chỉnh sửa đã được ghi nhận. Chúng tôi sẽ xử lý và phản hồi qua Drive/Zalo sớm nhất.");
+    document.getElementById('modal-payment').classList.remove('open');
+    logActivity('CAMERA_UPLOAD', 'Yêu cầu Photoshop', document.getElementById('ps-quantity').value + ' tấm');
+}
 </script>
 </body>
 </html>

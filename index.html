@@ -1393,7 +1393,6 @@ header{
         <button class="side-btn" id="arch-tab-samples" onclick="switchArchiveTab('samples')">🧪 Mẫu</button>
       </div>
       <div id="archive-bh-content"><!-- render hố khoan lưu trữ --></div>
-      <div id="archive-samples-content" style="display:none"><!-- render mẫu lưu trữ (code hiện tại) --></div>
       <div class="sec-header"><div class="sec-title">🗄️ Mẫu hoàn thành</div></div>
       <div id="archive-bulk-bar" style="display:none;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:10px;padding:9px 12px;background:var(--white);border:var(--border);border-radius:var(--r-md);box-shadow:var(--shadow-xs);">
         <button class="btn btn-ghost btn-sm" onclick="archiveBulkSelAll(true)">Chọn tất cả</button>
@@ -1513,24 +1512,24 @@ header{
 <!-- ADD/EDIT BH -->
 <div class="modal-overlay" id="modal-bh-add" onclick="if(event.target===this)closeAddModal()">
   <div class="modal">
-    <div class="modal-title" id="add-modal-title">🕳️ Thêm Hố Khoan</div>
+    <div class="modal-title" id="bh-add-modal-title">🕳️ Thêm Hố Khoan</div>
     <div class="form-group">
       <label class="form-label">Hố khoan (HK)</label>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
         <select class="form-select" id="bh-select" style="flex:1;" onchange="onHkSelect()"><option value="">— Chọn HK đã có —</option></select>
-        <input class="form-input" id="bh-new" placeholder="Hoặc nhập HK mới..." style="flex:1;"/>
+        <input class="form-input" id="bh-f-name" placeholder="Hoặc nhập HK mới..." style="flex:1;"/>
       </div>
     </div>
     <div class="form-group"><label class="form-label">Mô tả</label><input class="form-input" id="bh-f-desc" placeholder="VD: Sét lẫn cát"/></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:var(--border);">
-      <button class="btn btn-ghost" onclick="closeAddModal()">Hủy</button>
-      <button class="btn btn-primary" id="add-modal-btn" onclick="saveModalSample()">✓ Thêm mẫu</button>
+      <button class="btn btn-ghost" onclick="closeBhAddModal()">Hủy</button>
+      <button class="btn btn-primary" id="bh-add-modal-btn" onclick="saveBhModal()">✓ Thêm HK</button>
     </div>
   </div>
 </div>
 
 <!-- IMPORT MODAL BH-->
-<div class="modal-overlay" id="modal-import" onclick="if(event.target===this)closeImportModal()">
+<div class="modal-overlay" id="modal-bh-import" onclick="if(event.target===this)closeImportModal()">
   <div class="modal modal-xl">
     <div class="modal-title">📋 Import từ Excel</div>
     <div class="form-group"><label class="form-label">Dán dữ liệu từ Excel</label><textarea id="excel-paste" rows="4" style="width:100%;padding:7px 10px;background:var(--earth-bg);border:var(--border-md);border-radius:var(--r-sm);font-family:var(--font-ui);font-size:.78rem;resize:vertical;outline:none;" placeholder="Ctrl+V để dán từ Excel vào đây..." oninput="parseAndRenderImport()"></textarea></div>
@@ -1557,22 +1556,22 @@ header{
         <div class="bulk-toolbar">
           <button class="btn btn-ghost btn-sm" onclick="bulkSelAllSamples(true)">Tất cả</button>
           <button class="btn btn-ghost btn-sm" onclick="bulkSelAllSamples(false)">Bỏ chọn</button>
-          <span class="cnt-badge" id="b-sc">0 mẫu</span>
+          <span class="cnt-badge" id="bh-b-sc">0 HK</span>
         </div>
-        <div class="sample-sel-list" id="bulk-samples"></div>
+        <div class="sample-sel-list" id="bh-bulk-list"></div>
       </div>
       <div>
         <div class="bulk-section-title">② Chọn công đoạn (cho tick)</div>
         <div class="bulk-toolbar">
           <button class="btn btn-ghost btn-sm" onclick="bulkSelAllSteps(true)">Tất cả</button>
           <button class="btn btn-ghost btn-sm" onclick="bulkSelAllSteps(false)">Bỏ chọn</button>
-          <span class="cnt-badge" id="b-stc">0 bước</span>
+          <span class="cnt-badge" id="bh-b-stc">0 bước</span>
         </div>
-        <div id="bulk-steps" style="max-height:310px;overflow-y:auto;"></div>
+        <div id="bh-bulk-steps" style="max-height:310px;overflow-y:auto;"></div>
       </div>
     </div>
     <div class="bulk-action-bar">
-      <span class="bar-label" id="b-preview">Chọn Hố Khoan để thao tác</span>
+      <span class="bar-label" id="bh-b-preview">Chọn Hố Khoan để thao tác</span>
       <button class="btn btn-moss btn-sm" onclick="applyBulk()">✓ Tick</button>
       <button class="btn btn-ghost btn-sm" onclick="applyBulkUntick()" style="border-color:var(--rust);color:var(--rust);">✕ Bỏ tick</button>
       <button class="btn btn-sky btn-sm" onclick="bulkArchive()">🗄️ Lưu trữ</button>

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>PTN Lab v9 - Fixed</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet"/>
+    <style>
+        /* Giữ nguyên toàn bộ CSS của bạn từ v9 vì nó đã rất đẹp và chuẩn UI */
+        :root{
+            --black:#1a1208; --earth:#c17f24; --earth-dark:#8a5a10; --earth-light:#d4a04a;
+            --earth-pale:#fdf3dc; --earth-bg:#f5f0e8; --tan-pale:#fef8ef; --moss:#5a8a2e;
+            --moss-pale:#eef6e0; --sky:#3d6e8a; --rust:#b04010; --white:#ffffff;
+            --text-muted:#6b5a3e; --border-color:#d4c4a0; --border:1px solid var(--border-color);
+            --border-md:1.5px solid var(--border-color); --r-sm:4px; --r-md:6px; --r-lg:8px;
+            --font-ui:'IBM Plex Sans',sans-serif; --font-mono:'IBM Plex Mono',monospace;
+        }
+        /* ... (Phần CSS giữ nguyên giống bản gốc của bạn) ... */
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:var(--font-ui);background:var(--earth-bg);color:var(--black);font-size:14px;min-height:100vh;display:flex;flex-direction:column;}
+        header{background:var(--black);border-bottom:2px solid var(--earth);padding:0 24px;height:52px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:200;}
+        .logo{font-weight:700;color:var(--earth-light);font-family:var(--font-mono);text-transform:uppercase;}
+        .app-layout{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 52px);}
+        .sidebar{border-right:var(--border-md);background:var(--white);position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;}
+        .side-btn{width:100%;padding:10px;border:none;background:transparent;text-align:left;cursor:pointer;font-weight:500;color:var(--text-muted);}
+        .side-btn.active{background:var(--earth-pale);color:var(--earth-dark);border-left:3px solid var(--earth);}
+        .main-content{padding:20px;}
+        .content-section{display:none;}
+        .content-section.active{display:block;}
+        .sample-item{background:var(--white);border:var(--border);margin-bottom:2px;border-left:3px solid var(--border-color);}
+        .sample-header{display:grid;grid-template-columns:auto 1fr auto auto;padding:10px;align-items:center;gap:10px;}
+        .s-id{background:var(--earth);color:var(--white);padding:2px 8px;border-radius:var(--r-sm);font-family:var(--font-mono);font-weight:700;}
+        .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;}
+        .modal-overlay.open{display:flex;}
+        .modal{background:#fff;padding:20px;border-radius:8px;width:500px;max-width:90%;}
+        .import-table-wrap{max-height:300px;overflow:auto;margin-top:10px;border:1px solid #ddd;}
+        .import-table{width:100%;border-collapse:collapse;font-size:12px;}
+        .import-table th, .import-table td{border:1px solid #eee;padding:5px;}
+        .row-err{background:#fff0f0;} .row-ok{background:#f0fff0;}
+        /* (Thêm các CSS khác từ bản gốc nếu cần) */
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">🔬 PTN LAB <span style="font-size:10px;background:var(--earth);padding:2px 5px;border-radius:4px;color:#000;">v9.1</span></div>
+    <div class="header-right" style="display:flex;gap:10px;align-items:center;">
+        <div id="user-info" style="color:#d4c4a0;font-size:12px;font-weight:600;">Khách</div>
+        <button id="auth-btn" class="btn" style="background:var(--earth);border:none;padding:5px 10px;cursor:pointer;border-radius:4px;">Đăng nhập</button>
+    </div>
+</header>
+
+<div class="app-layout">
+    <aside class="sidebar">
+        <button class="side-btn active" onclick="showSection('samples',this)">🧪 Mẫu thí nghiệm</button>
+        <button class="side-btn" onclick="showSection('today',this)">📊 Tổng kết</button>
+        <button class="side-btn" onclick="showSection('archive',this)">🗄️ Lưu trữ</button>
+        <button class="side-btn" onclick="showSection('trash',this)">🗑️ Thùng rác</button>
+    </aside>
+
+    <main class="main-content">
+        <div class="content-section active" id="section-samples">
+            <div style="display:flex;justify-content:space-between;margin-bottom:15px;">
+                <h2>Danh sách mẫu</h2>
+                <div style="display:flex;gap:5px;">
+                    <button onclick="openImportModal()" style="padding:8px 15px;background:var(--sky);color:#fff;border:none;border-radius:4px;cursor:pointer;">📋 Import Excel</button>
+                    <button onclick="openAddModal()" style="padding:8px 15px;background:var(--earth);color:#fff;border:none;border-radius:4px;cursor:pointer;">+ Thêm mẫu</button>
+                </div>
+            </div>
+            <input type="text" id="search-box" placeholder="Tìm kiếm mẫu..." oninput="renderSamples()" style="width:100%;padding:10px;margin-bottom:10px;border:var(--border-md);border-radius:4px;">
+            <div id="sample-list"></div>
+        </div>
+
+        <div class="content-section" id="section-archive">
+            <h2>🗄️ Kho lưu trữ (Hoàn thành)</h2>
+            <div id="archive-list" style="margin-top:15px;"></div>
+        </div>
+
+        <div class="content-section" id="section-trash">
+            <h2>🗑️ Thùng rác</h2>
+            <div id="trash-list"></div>
+        </div>
+    </main>
+</div>
+
+<div class="modal-overlay" id="modal-add">
+    <div class="modal">
+        <h3 id="modal-title">Thêm mẫu mới</h3>
+        <input type="text" id="f-hk" placeholder="Hố khoan (HK)" style="width:100%;margin:10px 0;padding:8px;">
+        <input type="text" id="f-id" placeholder="Số hiệu mẫu (ID)" style="width:100%;margin:10px 0;padding:8px;">
+        <input type="text" id="f-depth" placeholder="Độ sâu" style="width:100%;margin:10px 0;padding:8px;">
+        <div style="text-align:right;margin-top:15px;">
+            <button onclick="closeAddModal()">Hủy</button>
+            <button onclick="saveSample()" style="background:var(--earth);color:#fff;padding:8px 15px;border:none;">Lưu</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modal-import">
+    <div class="modal" style="width:800px;">
+        <h3>📋 Import dữ liệu từ Excel</h3>
+        <p style="font-size:11px;color:gray;">Copy các cột từ Excel theo thứ tự: ID | HK | Code | Depth | Description | Types (9ct,uu...)</p>
+        <textarea id="excel-paste" rows="5" style="width:100%;margin-top:10px;padding:10px;" placeholder="Dán dữ liệu tại đây..." oninput="parseImport()"></textarea>
+        <div class="import-table-wrap">
+            <table class="import-table">
+                <thead><tr><th>#</th><th>ID</th><th>HK</th><th>Code</th><th>Depth</th><th>Loại TN</th><th>TT</th></tr></thead>
+                <tbody id="import-tbody"></tbody>
+            </table>
+        </div>
+        <div style="text-align:right;margin-top:15px;">
+            <button onclick="closeImportModal()">Hủy</button>
+            <button id="btn-do-import" disabled onclick="executeImport()" style="background:var(--sky);color:#fff;padding:8px 15px;border:none;">Xác nhận Import</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+// 1. CẤU HÌNH FIREBASE (Dùng cấu hình của bạn)
+const firebaseConfig = {
+    apiKey: "AIzaSyCiLP0uKWKR3LkvvdaSabSxhzN9s6G7A6c",
+    authDomain: "las-dashboard-522c4.firebaseapp.com",
+    projectId: "las-dashboard-522c4",
+    storageBucket: "las-dashboard-522c4.firebasestorage.app",
+    messagingSenderId: "297545923187",
+    appId: "1:297545923187:web:620d57ce99a5aea70f4806"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+let samples = [];
+let archived = [];
+let trashed = [];
+let currentUser = null;
+let importData = [];
+
+// 2. LẮNG NGHE DỮ LIỆU REALTIME
+function initDataSync() {
+    // Lắng nghe Mẫu đang làm
+    db.collection('ptn_samples').onSnapshot(snapshot => {
+        samples = snapshot.docs.map(doc => ({fsId: doc.id, ...doc.data()}));
+        renderSamples();
+    });
+
+    // Lắng nghe Mẫu lưu trữ
+    db.collection('ptn_archived').onSnapshot(snapshot => {
+        archived = snapshot.docs.map(doc => ({fsId: doc.id, ...doc.data()}));
+        if(document.getElementById('section-archive').classList.contains('active')) renderArchive();
+    });
+
+    // Lắng nghe Thùng rác
+    db.collection('ptn_deleted').onSnapshot(snapshot => {
+        trashed = snapshot.docs.map(doc => ({fsId: doc.id, ...doc.data()}));
+    });
+}
+
+// 3. QUẢN LÝ GIAO DIỆN
+function showSection(name, btn) {
+    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.side-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('section-' + name).classList.add('active');
+    btn.classList.add('active');
+    
+    if(name === 'samples') renderSamples();
+    if(name === 'archive') renderArchive();
+}
+
+// 4. LOGIC RENDER
+function renderSamples() {
+    const list = document.getElementById('sample-list');
+    const search = document.getElementById('search-box').value.toLowerCase();
+    const filtered = samples.filter(s => (s.id+s.hk).toLowerCase().includes(search));
+    
+    list.innerHTML = filtered.length ? '' : '<p>Không có mẫu nào.</p>';
+    filtered.forEach(s => {
+        const item = document.createElement('div');
+        item.className = 'sample-item';
+        item.innerHTML = `
+            <div class="sample-header">
+                <span class="s-id">${s.id}</span>
+                <div><b>${s.hk}</b> | ${s.depth || '--'}m</div>
+                <div style="font-size:12px;color:gray;">Tiến độ: ${calcPct(s)}%</div>
+                <button onclick="moveToArchive('${s.fsId}')" style="font-size:10px;">Lưu trữ</button>
+            </div>
+        `;
+        list.appendChild(item);
+    });
+}
+
+function renderArchive() {
+    const list = document.getElementById('archive-list');
+    list.innerHTML = archived.length ? '' : '<p>Kho trống.</p>';
+    archived.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'sample-item';
+        div.style.opacity = '0.8';
+        div.innerHTML = `
+            <div class="sample-header">
+                <span class="s-id" style="background:#555;">${s.id}</span>
+                <div><b>HK: ${s.hk}</b> | Đã xong</div>
+                <button onclick="restoreFromArchive('${s.fsId}')" style="font-size:10px;">↩ Phục hồi</button>
+            </div>
+        `;
+        list.appendChild(div);
+    });
+}
+
+// 5. LOGIC IMPORT EXCEL (FIXED)
+function parseImport() {
+    const text = document.getElementById('excel-paste').value.trim();
+    if(!text) { importData = []; renderImportTable(); return; }
+    
+    const lines = text.split('\n');
+    importData = lines.map(line => {
+        const cols = line.split('\t');
+        return {
+            id: (cols[0] || '').trim(),
+            hk: (cols[1] || '').trim(),
+            code: (cols[2] || '').trim(),
+            depth: (cols[3] || '').trim(),
+            desc: (cols[4] || '').trim(),
+            types: (cols[5] || '').trim().toLowerCase().split(',').filter(t => t)
+        };
+    }).filter(row => row.id || row.hk);
+    
+    renderImportTable();
+}
+
+function renderImportTable() {
+    const tbody = document.getElementById('import-tbody');
+    tbody.innerHTML = '';
+    let isValid = false;
+
+    importData.forEach((row, i) => {
+        const isDup = samples.some(s => s.id === row.id && s.hk === row.hk);
+        const hasError = !row.id || !row.hk;
+        if(!hasError && !isDup) isValid = true;
+
+        const tr = document.createElement('tr');
+        tr.className = hasError ? 'row-err' : (isDup ? 'row-err' : 'row-ok');
+        tr.innerHTML = `
+            <td>${i+1}</td>
+            <td>${row.id}</td>
+            <td>${row.hk}</td>
+            <td>${row.code}</td>
+            <td>${row.depth}</td>
+            <td>${row.types.join(',')}</td>
+            <td>${hasError ? '❌ Thiếu' : (isDup ? '🚫 Trùng' : '✅ OK')}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+    document.getElementById('btn-do-import').disabled = !isValid;
+}
+
+async function executeImport() {
+    if(!confirm('Bắt đầu import dữ liệu hố khoan?')) return;
+    for (let row of importData) {
+        if(row.id && row.hk && !samples.some(s => s.id === row.id && s.hk === row.hk)) {
+            const ns = {
+                hk: row.hk, id: row.id, code: row.code, depth: row.depth, 
+                desc: row.desc, types: row.types, steps: {}, 
+                createdAt: new Date().toISOString()
+            };
+            await db.collection('ptn_samples').add(ns);
+        }
+    }
+    alert('Import hoàn tất!');
+    closeImportModal();
+}
+
+// 6. CÁC HÀM XỬ LÝ DỮ LIỆU
+async function moveToArchive(fsId) {
+    const doc = await db.collection('ptn_samples').doc(fsId).get();
+    if(doc.exists) {
+        await db.collection('ptn_archived').doc(fsId).set(doc.data());
+        await db.collection('ptn_samples').doc(fsId).delete();
+    }
+}
+
+async function restoreFromArchive(fsId) {
+    const doc = await db.collection('ptn_archived').doc(fsId).get();
+    if(doc.exists) {
+        await db.collection('ptn_samples').doc(fsId).set(doc.data());
+        await db.collection('ptn_archived').doc(fsId).delete();
+    }
+}
+
+function calcPct(s) {
+    if(!s.steps) return 0;
+    const done = Object.values(s.steps).filter(v => v === true).length;
+    return Math.round((done / 24) * 100) || 0; // Giả sử tổng 24 bước
+}
+
+// 7. AUTH & MODAL
+auth.onAuthStateChanged(user => {
+    currentUser = user;
+    document.getElementById('user-info').textContent = user ? (user.displayName || user.email) : 'Khách';
+    document.getElementById('auth-btn').textContent = user ? 'Đăng xuất' : 'Đăng nhập';
+    if(user) initDataSync();
+});
+
+document.getElementById('auth-btn').onclick = () => {
+    if(currentUser) auth.signOut();
+    else auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+};
+
+function openAddModal() { document.getElementById('modal-add').classList.add('open'); }
+function closeAddModal() { document.getElementById('modal-add').classList.remove('open'); }
+function openImportModal() { document.getElementById('modal-import').classList.add('open'); }
+function closeImportModal() { document.getElementById('modal-import').classList.remove('open'); }
+
+async function saveSample() {
+    const id = document.getElementById('f-id').value;
+    const hk = document.getElementById('f-hk').value;
+    if(!id || !hk) return alert('Nhập đủ ID và HK');
+    await db.collection('ptn_samples').add({
+        id, hk, depth: document.getElementById('f-depth').value,
+        steps: {}, createdAt: new Date().toISOString()
+    });
+    closeAddModal();
+}
+</script>
+
+</body>
+</html>

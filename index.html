@@ -2242,12 +2242,10 @@ function submitPsOrder() {
     };
 
     fetch(APPS_SCRIPT_MAIL, {
-        method: 'POST',
-        body: JSON.stringify(payload) // Gửi dạng JSON để khớp với JSON.parse trong Apps Script
-    })
-    .then(res => res.json())
-    .then(data => console.log("Email notify status:", data))
-    .catch(err => console.warn("Email notify failed", err));
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(payload)
+})
 }
 function confirmPsPayment() {
     alert("Cảm ơn bạn! Yêu cầu chỉnh sửa đã được ghi nhận. Chúng tôi sẽ xử lý và phản hồi qua Drive/Zalo sớm nhất.");

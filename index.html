@@ -2230,24 +2230,23 @@ function submitPsOrder() {
     document.getElementById('qr-price').textContent = "Số tiền: " + total.toLocaleString('vi-VN') + "đ";
     document.getElementById('modal-payment').classList.add('open');
 
-    // Gửi thông báo ngầm qua Email (Sử dụng Apps Script hiện có của bạn)
     var payload = {
-        action: "PHOTOSHOP_REQUEST",
-        user: who,
-        quantity: qty,
-        note: note,
-        total: total,
-        targetEmail: "geolabdata@gmail.com"
+        action: "PHOTOSHOP_REQUEST", // Biến để Apps Script nhận diện gửi email
+        details: {
+            user: who,
+            quantity: qty,
+            note: note,
+            total: total
+        }
     };
 
     fetch(APPS_SCRIPT, {
         method: 'POST',
-        body: new URLSearchParams({
-            image: "REQUEST_ONLY", // Đánh dấu đây là tin nhắn yêu cầu, không phải ảnh
-            filename: `REQ_PS_${Date.now()}.txt`,
-            details: JSON.stringify(payload)
-        })
-    }).catch(err => console.warn("Email notify failed", err));
+        body: JSON.stringify(payload) // Gửi dạng JSON để khớp với JSON.parse trong Apps Script
+    })
+    .then(res => res.json())
+    .then(data => console.log("Email notify status:", data))
+    .catch(err => console.warn("Email notify failed", err));
 }
 
 function confirmPsPayment() {

@@ -2241,15 +2241,15 @@ function submitPsOrder() {
     };
 
     fetch(APPS_SCRIPT, {
-    method: 'POST',
-    headers: {
-        "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-})
-.then(res => res.text())
-.then(data => console.log("RAW:", data))
-.catch(err => console.error(err));
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.text())
+    .then(data => console.log("RAW:", data))
+    .catch(err => console.error(err));
 
 function confirmPsPayment() {
     alert("Cảm ơn bạn! Yêu cầu chỉnh sửa đã được ghi nhận. Chúng tôi sẽ xử lý và phản hồi qua Drive/Zalo sớm nhất.");

@@ -2250,7 +2250,7 @@ function submitPsOrder() {
     .then(res => res.text())
     .then(data => console.log("RAW:", data))
     .catch(err => console.error(err));
-
+}
 function confirmPsPayment() {
     alert("Cảm ơn bạn! Yêu cầu chỉnh sửa đã được ghi nhận. Chúng tôi sẽ xử lý và phản hồi qua Drive/Zalo sớm nhất.");
     document.getElementById('modal-payment').classList.remove('open');

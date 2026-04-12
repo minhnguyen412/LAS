@@ -2230,24 +2230,8 @@ function submitPsOrder() {
     document.getElementById('qr-price').textContent = "Số tiền: " + total.toLocaleString('vi-VN') + "đ";
     document.getElementById('modal-payment').classList.add('open');
 
-    var payload = {
-        action: "PHOTOSHOP_REQUEST", // Biến để Apps Script nhận diện gửi email
-        details: {
-            user: who,
-            quantity: qty,
-            note: note,
-            total: total
-        }
-    };
 
-    fetch(APPS_SCRIPT, {
-        method: 'POST',
-        body: new URLSearchParams({
-            image: "REQUEST_ONLY", // Đánh dấu đây là tin nhắn yêu cầu, không phải ảnh
-            filename: `REQ_PS_${Date.now()}.txt`,
-            details: JSON.stringify(payload)
-        })
-    }).catch(err => console.warn("Email notify failed", err));
+    
 }
 function confirmPsPayment() {
     alert("Cảm ơn bạn! Yêu cầu chỉnh sửa đã được ghi nhận. Chúng tôi sẽ xử lý và phản hồi qua Drive/Zalo sớm nhất.");

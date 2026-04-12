@@ -1235,6 +1235,24 @@ header{
   .wf-branch{border-right:none;}
   .wf-branch:nth-child(3){border-right:none;}
 }
+   /* ══ HK ARCHIVE TABS ══ */
+.archive-tabs{display:flex;gap:0;border-bottom:var(--border-md);margin-bottom:14px;}
+.archive-tab{padding:7px 18px;font-size:.78rem;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;color:var(--text-muted);background:none;border-top:none;border-left:none;border-right:none;}
+.archive-tab.active{color:var(--earth-dark);border-bottom-color:var(--earth);}
+.archive-tab:hover{color:var(--black);}
+
+/* ══ HK CARD ══ */
+.hk-item{background:var(--white);border:var(--border);border-left:3px solid var(--border-color);overflow:hidden;transition:border-left-color .15s;margin-bottom:1px;}
+.hk-item:hover{border-left-color:var(--sky);}
+.hk-item:first-child{border-radius:var(--r-md) var(--r-md) 0 0;}
+.hk-item:last-child{border-radius:0 0 var(--r-md) var(--r-md);}
+.hk-item:only-child{border-radius:var(--r-md);}
+.hk-id{background:var(--sky);color:var(--white);border-radius:var(--r-sm);padding:2px 10px;font-size:.72rem;font-weight:700;white-space:nowrap;font-family:var(--font-mono);letter-spacing:.04em;}
+.hk-step-node{display:flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid #e4d4b8;background:var(--white);border-radius:var(--r-sm);cursor:pointer;user-select:none;transition:all .12s;font-size:.74rem;font-weight:600;}
+.hk-step-node:hover{border-color:var(--sky);background:rgba(61,110,138,.05);}
+.hk-step-node.checked{background:var(--moss-pale);border-color:var(--moss);color:#4a7020;}
+.hk-step-chk{width:12px;height:12px;border-radius:var(--r-sm);border:1.5px solid #c0a870;background:var(--white);display:flex;align-items:center;justify-content:center;font-size:7px;color:transparent;font-weight:700;flex-shrink:0;}
+.hk-step-node.checked .hk-step-chk{background:#5a8a2e;border-color:#5a8a2e;color:var(--white);}
 </style>
 </head>
 <body>
@@ -1250,7 +1268,7 @@ header{
   <aside class="sidebar">
     <div class="sidebar-section">
       <div class="sidebar-label">Điều hướng</div>
-      <button class="side-btn active" onclick="showSection('boreholes',this)"><span>🕳️</span> Hố khoan</button>
+      <button class="side-btn active" onclick="showSection('hokhoan',this)"><span>🕳️</span> Hố khoan</button>
       <button class="side-btn" onclick="showSection('samples',this)"><span>🧪</span> Mẫu thí nghiệm</button>
       <button class="side-btn" onclick="showSection('today',this)"><span>📊</span> Tổng kết hôm nay</button>
       <button class="side-btn" onclick="showSection('camera',this)"><span>📸</span> Chụp ảnh</button>
@@ -1259,29 +1277,38 @@ header{
       <button class="side-btn" onclick="showSection('docs',this)"><span>📖</span> Tài liệu</button>
     </div>
     <div class="sidebar-stats">
-      <div class="stat-chip"><span class="num" id="stat-active">0</span>Đang làm</div>
-      <div class="stat-chip"><span class="num" id="stat-done">0</span>Hoàn thành</div>
+      <div class="stat-chip"><span class="num" id="stat-hk">0</span>Hố khoan</div>
+      <div class="stat-chip"><span class="num" id="stat-active">0</span>Mẫu TN</div>
     </div>
   </aside>
 
   <div class="main-content">
-     <div class="content-section active" id="section-boreholes">
-        <div class="sec-header">
-          <div class="sec-title">🕳️ Danh sách hố khoan</div>
-          <div style="display:flex;gap:7px;flex-wrap:wrap;">
-            <button class="btn btn-ghost" onclick="openBhBulkModal()" style="border-color:var(--moss);color:var(--moss);">☑ Tick hàng loạt</button>
-            <button class="btn btn-sky" onclick="openBhImportModal()">📋 Import Excel</button>
-            <button class="btn btn-primary" onclick="openBhAddModal()">+ Thêm hố khoan</button>
-        </div>
-      </div>
-      <div id="bh-list">
-        <div class="empty-state" id="empty-bh">
-          <span class="e-icon">🕳️</span>
-          <h3>Chưa có hố khoan</h3>
-          <p>Nhấn "+ Thêm hố khoan" hoặc "Import Excel"</p>
-        </div>
-      </div>
-     </div>
+     <!-- ══ HỐ KHOAN ══ -->
+<div class="content-section active" id="section-hokhoan">
+  <div class="sec-header">
+    <div class="sec-title">🕳️ Danh sách hố khoan</div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;">
+      <button class="btn btn-ghost" onclick="openHkBulkModal()" style="border-color:var(--moss);color:var(--moss);">☑ Tick hàng loạt</button>
+      <button class="btn btn-sky" onclick="openHkImportModal()">📋 Import Excel</button>
+      <button class="btn btn-primary" onclick="openHkAddModal()">+ Thêm hố khoan</button>
+    </div>
+  </div>
+  <div class="samples-toolbar">
+    <input class="search-box" id="hk-search-box" placeholder="🔍 Tên hố khoan, dự án, địa điểm..." oninput="renderHkList()"/>
+    <select class="form-select" style="width:auto;padding:6px 10px;" id="hk-sort-order" onchange="renderHkList()">
+      <option value="">— Sắp xếp —</option>
+      <option value="id-asc">Tên A→Z</option>
+      <option value="id-desc">Tên Z→A</option>
+      <option value="pct-asc">Tiến độ ↑</option>
+      <option value="pct-desc">Tiến độ ↓</option>
+      <option value="date-desc">Mới nhất</option>
+      <option value="date-asc">Cũ nhất</option>
+    </select>
+  </div>
+  <div id="hk-list">
+    <div class="empty-state" id="empty-hk"><span class="e-icon">🕳️</span><h3>Chưa có hố khoan nào</h3><p>Nhấn "+ Thêm hố khoan" hoặc "Import Excel"</p></div>
+  </div>
+</div>
     <div class="content-section" id="section-samples">
       <div class="sec-header">
         <div class="sec-title">🧪 Danh sách mẫu</div>
@@ -1376,6 +1403,47 @@ header{
           <div id="pc-upload-status" class="upload-status"></div>
           <div id="pc-log-list" style="margin-top:12px;display:flex;flex-direction:column;gap:5px;"></div>
         </div>
+        <div class="camera-panel" style="border-top: 3px solid var(--rust); position: relative; overflow: hidden;">
+          <div style="position: absolute; top: 10px; right: -30px; background: var(--rust); color: white; padding: 5px 40px; transform: rotate(45deg); font-size: 0.6rem; font-weight: 700;">DỊCH VỤ</div>
+          <h3>🎨 Dịch vụ Photoshop hình ảnh</h3>
+          <p style="font-size:.78rem; color:var(--text-muted); margin-bottom:12px;">Chỉnh sửa hình ảnh theo yêu cầu.</p>
+    
+          <div style="background: var(--earth-pale); border: 1px dashed var(--earth); padding: 12px; border-radius: var(--r-md); margin-bottom: 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: .82rem; font-weight: 600;">Số lượng ảnh cần sửa:</span>
+              <input type="number" id="ps-quantity" value="1" min="1" oninput="calculatePsTotal()" style="width: 60px; padding: 4px; border: var(--border); border-radius: var(--r-sm); text-align: center; font-family: var(--font-mono);">
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: .82rem; font-weight: 600;">Đơn giá:</span>
+              <span style="font-family: var(--font-mono); font-weight: 700;">2.000đ / tấm</span>
+            </div>
+            <hr style="border: none; border-top: 1px solid rgba(193,127,36,.2); margin: 8px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: .85rem; font-weight: 700; color: var(--rust);">TỔNG CỘNG:</span>
+              <span id="ps-total-price" style="font-size: 1.1rem; font-weight: 700; color: var(--rust); font-family: var(--font-mono);">2.000đ</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Yêu cầu chỉnh sửa (Nếu có)</label>
+            <textarea id="ps-request-note" class="form-input" style="height: 60px; resize: none;" placeholder="Ví dụ: Làm sáng mẫu số 5, xóa nền rác..."></textarea>
+          </div>
+
+          <button class="cam-snap-btn" id="ps-submit-btn" onclick="submitPsOrder()" style="background: var(--sky); border-color: #2d5470;">🚀 Gửi yêu cầu & Thanh toán</button>
+        </div>
+
+        <div class="modal-overlay" id="modal-payment" onclick="if(event.target===this)this.classList.remove('open')">
+          <div class="modal" style="width: 340px; text-align: center;">
+            <div class="modal-title">Quét mã thanh toán</div>
+            <p style="font-size: .75rem; margin-bottom: 15px; color: var(--text-muted);">Vui lòng thanh toán để kích hoạt dịch vụ Photoshop</p>
+            <div style="background: #fff; padding: 10px; border-radius: var(--r-md); display: inline-block; border: var(--border-md);">
+              <img id="qr-code-img" src="" alt="QR Thanh toán" style="width: 240px; height: 240px; display: block;">
+            </div>
+            <div style="margin-top: 15px; font-weight: 700; font-family: var(--font-mono); color: var(--rust);" id="qr-price"></div>
+            <p style="font-size: .65rem; color: #999; margin-top: 10px;">Hệ thống sẽ gửi thông báo đến datageolab@gmail.com ngay khi bạn nhấn xác nhận.</p>
+            <button class="btn btn-primary" style="width: 100%; margin-top: 15px;" onclick="confirmPsPayment()">✓ Tôi đã thanh toán</button>
+          </div>
+        </div>
         <div class="camera-panel">
           <h3>📂 Google Drive</h3>
           <div class="drive-links">
@@ -1388,23 +1456,34 @@ header{
     </div>
 
     <div class="content-section" id="section-archive">
-      <div style="display:flex;gap:4px;margin-bottom:12px;border-bottom:var(--border-md);padding-bottom:0;">
-        <button class="side-btn active" id="arch-tab-bh" onclick="switchArchiveTab('bh')">🕳️ Hố khoan</button>
-        <button class="side-btn" id="arch-tab-samples" onclick="switchArchiveTab('samples')">🧪 Mẫu</button>
-      </div>
-      <div id="archive-bh-content"><!-- render hố khoan lưu trữ --></div>
-      <div id="archive-samples-content" style="display:none"><!-- render mẫu lưu trữ (code hiện tại) --></div>
-      <div class="sec-header"><div class="sec-title">🗄️ Mẫu hoàn thành</div></div>
-      <div id="archive-bulk-bar" style="display:none;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:10px;padding:9px 12px;background:var(--white);border:var(--border);border-radius:var(--r-md);box-shadow:var(--shadow-xs);">
-        <button class="btn btn-ghost btn-sm" onclick="archiveBulkSelAll(true)">Chọn tất cả</button>
-        <button class="btn btn-ghost btn-sm" onclick="archiveBulkSelAll(false)">Bỏ chọn</button>
-        <span id="archive-sel-count" style="font-size:.72rem;font-weight:700;background:var(--earth-pale);border:var(--border-md);border-radius:var(--r-sm);padding:2px 9px;font-family:var(--font-mono);">0 đã chọn</span>
-        <div style="flex:1;"></div>
-        <button class="btn btn-ghost btn-sm" onclick="archiveBulkRestore()" style="border-color:var(--sky);color:var(--sky);">↩ Phục hồi</button>
-        <button class="btn btn-rust btn-sm" onclick="archiveBulkDeletePrompt()">🗑️ Xóa đã chọn</button>
-      </div>
-      <div id="archive-list"><div class="empty-state"><span class="e-icon">🗄️</span><h3>Chưa có mẫu hoàn thành</h3></div></div>
+  <div class="sec-header"><div class="sec-title">🗄️ Lưu trữ</div></div>
+  <div class="archive-tabs">
+    <button class="archive-tab active" id="atab-hk" onclick="switchArchiveTab('hk')">🕳️ Hố khoan (<span id="atab-hk-cnt">0</span>)</button>
+    <button class="archive-tab" id="atab-sample" onclick="switchArchiveTab('sample')">🧪 Mẫu TN (<span id="atab-sample-cnt">0</span>)</button>
+  </div>
+  <div id="archive-hk-panel">
+    <div id="archive-hk-bulk-bar" style="display:none;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:10px;padding:9px 12px;background:var(--white);border:var(--border);border-radius:var(--r-md);">
+      <button class="btn btn-ghost btn-sm" onclick="archiveHkBulkSelAll(true)">Chọn tất cả</button>
+      <button class="btn btn-ghost btn-sm" onclick="archiveHkBulkSelAll(false)">Bỏ chọn</button>
+      <span id="archive-hk-sel-count" style="font-size:.72rem;font-weight:700;background:var(--earth-pale);border:var(--border-md);border-radius:var(--r-sm);padding:2px 9px;font-family:var(--font-mono);">0 đã chọn</span>
+      <div style="flex:1;"></div>
+      <button class="btn btn-ghost btn-sm" onclick="archiveHkBulkRestore()" style="border-color:var(--sky);color:var(--sky);">↩ Phục hồi</button>
+      <button class="btn btn-rust btn-sm" onclick="archiveHkBulkDeletePrompt()">🗑️ Xóa đã chọn</button>
     </div>
+    <div id="archive-hk-list"><div class="empty-state"><span class="e-icon">🕳️</span><h3>Chưa có hố khoan hoàn thành</h3></div></div>
+  </div>
+  <div id="archive-sample-panel" style="display:none;">
+    <div id="archive-bulk-bar" style="display:none;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:10px;padding:9px 12px;background:var(--white);border:var(--border);border-radius:var(--r-md);box-shadow:var(--shadow-xs);">
+      <button class="btn btn-ghost btn-sm" onclick="archiveBulkSelAll(true)">Chọn tất cả</button>
+      <button class="btn btn-ghost btn-sm" onclick="archiveBulkSelAll(false)">Bỏ chọn</button>
+      <span id="archive-sel-count" style="font-size:.72rem;font-weight:700;background:var(--earth-pale);border:var(--border-md);border-radius:var(--r-sm);padding:2px 9px;font-family:var(--font-mono);">0 đã chọn</span>
+      <div style="flex:1;"></div>
+      <button class="btn btn-ghost btn-sm" onclick="archiveBulkRestore()" style="border-color:var(--sky);color:var(--sky);">↩ Phục hồi</button>
+      <button class="btn btn-rust btn-sm" onclick="archiveBulkDeletePrompt()">🗑️ Xóa đã chọn</button>
+    </div>
+    <div id="archive-list"><div class="empty-state"><span class="e-icon">🗄️</span><h3>Chưa có mẫu hoàn thành</h3></div></div>
+  </div>
+</div>
 
     <div class="content-section" id="section-trash">
       <div class="sec-header">
@@ -1421,7 +1500,79 @@ header{
     </div>
   </div>
 </div>
+<!-- ADD/EDIT HK MODAL -->
+<div class="modal-overlay" id="modal-hk-add" onclick="if(event.target===this)closeHkAddModal()">
+  <div class="modal">
+    <div class="modal-title" id="hk-add-modal-title">🕳️ Thêm hố khoan</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Tên hố khoan *</label><input class="form-input" id="hk-f-name" placeholder="VD: HK-01"/></div>
+      <div class="form-group"><label class="form-label">Dự án</label><input class="form-input" id="hk-f-project" placeholder="VD: Dự án A"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Địa điểm</label><input class="form-input" id="hk-f-location" placeholder="VD: Quận 1, TP.HCM"/></div>
+      <div class="form-group"><label class="form-label">Độ sâu (m)</label><input class="form-input" id="hk-f-depth" placeholder="VD: 30"/></div>
+    </div>
+    <div class="form-group"><label class="form-label">Ghi chú</label><input class="form-input" id="hk-f-note" placeholder="Ghi chú thêm..."/></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:var(--border);">
+      <button class="btn btn-ghost" onclick="closeHkAddModal()">Hủy</button>
+      <button class="btn btn-primary" id="hk-add-modal-btn" onclick="saveHkModal()">✓ Thêm hố khoan</button>
+    </div>
+  </div>
+</div>
 
+<!-- HK IMPORT MODAL -->
+<div class="modal-overlay" id="modal-hk-import" onclick="if(event.target===this)closeHkImportModal()">
+  <div class="modal modal-xl">
+    <div class="modal-title">📋 Import hố khoan từ Excel</div>
+    <div class="hint-box"><b>Cách dùng:</b> Copy từ Excel → Paste:<br><b>Cột 1:</b> Tên HK &nbsp;|&nbsp; <b>Cột 2:</b> Dự án &nbsp;|&nbsp; <b>Cột 3:</b> Địa điểm &nbsp;|&nbsp; <b>Cột 4:</b> Độ sâu &nbsp;|&nbsp; <b>Cột 5:</b> Ghi chú</div>
+    <div class="form-group"><label class="form-label">Dán dữ liệu từ Excel</label><textarea id="hk-excel-paste" rows="4" style="width:100%;padding:7px 10px;background:var(--earth-bg);border:var(--border-md);border-radius:var(--r-sm);font-family:var(--font-ui);font-size:.78rem;resize:vertical;outline:none;" placeholder="Ctrl+V để dán từ Excel..." oninput="parseAndRenderHkImport()"></textarea></div>
+    <div id="hk-import-summary" class="import-summary"></div>
+    <div class="import-table-wrap" id="hk-import-table-wrap" style="display:none;">
+      <table class="import-table"><thead><tr><th>#</th><th>Tên HK</th><th>Dự án</th><th>Địa điểm</th><th>Độ sâu</th><th>Ghi chú</th><th>TT</th></tr></thead><tbody id="hk-import-tbody"></tbody></table>
+    </div>
+    <div style="display:flex;gap:7px;justify-content:flex-end;margin-top:12px;padding-top:12px;border-top:var(--border);">
+      <button class="btn btn-ghost btn-sm" onclick="addHkImportRow()">+ Thêm dòng</button>
+      <button class="btn btn-ghost" onclick="closeHkImportModal()">Hủy</button>
+      <button class="btn btn-sky" id="hk-import-btn" onclick="doHkImport()" disabled>⬇ Import hố khoan</button>
+    </div>
+  </div>
+</div>
+
+<!-- HK BULK MODAL -->
+<div class="modal-overlay" id="modal-hk-bulk" onclick="if(event.target===this)closeHkBulkModal()">
+  <div class="modal modal-xl bulk-modal">
+    <div class="modal-title">☑ Tick hàng loạt — Hố khoan</div>
+    <div class="hint-box">Chọn <b>hố khoan</b> (trái) → chọn <b>công đoạn</b> (phải) → Áp dụng tick.</div>
+    <div class="bulk-grid">
+      <div>
+        <div class="bulk-section-title">① Chọn hố khoan</div>
+        <div class="bulk-toolbar">
+          <button class="btn btn-ghost btn-sm" onclick="hkBulkSelAll(true)">Tất cả</button>
+          <button class="btn btn-ghost btn-sm" onclick="hkBulkSelAll(false)">Bỏ chọn</button>
+          <span class="cnt-badge" id="hkb-sc">0 hố</span>
+        </div>
+        <div class="sample-sel-list" id="hkbulk-hk-list"></div>
+      </div>
+      <div>
+        <div class="bulk-section-title">② Chọn công đoạn</div>
+        <div class="bulk-toolbar">
+          <button class="btn btn-ghost btn-sm" onclick="hkBulkStepSelAll(true)">Tất cả</button>
+          <button class="btn btn-ghost btn-sm" onclick="hkBulkStepSelAll(false)">Bỏ chọn</button>
+          <span class="cnt-badge" id="hkb-stc">0 bước</span>
+        </div>
+        <div id="hkbulk-steps" style="max-height:310px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;"></div>
+      </div>
+    </div>
+    <div class="bulk-action-bar">
+      <span class="bar-label" id="hkb-preview">Chọn hố khoan để thao tác</span>
+      <button class="btn btn-moss btn-sm" onclick="applyHkBulk()">✓ Tick</button>
+      <button class="btn btn-ghost btn-sm" onclick="applyHkBulkUntick()" style="border-color:var(--rust);color:var(--rust);">✕ Bỏ tick</button>
+      <button class="btn btn-sky btn-sm" onclick="hkBulkArchive()">🗄️ Lưu trữ</button>
+      <button class="btn btn-rust btn-sm" onclick="hkBulkDelete()">🗑️ Xóa</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeHkBulkModal()">Đóng</button>
+    </div>
+  </div>
+</div>
 <!-- ADD/EDIT MODAL -->
 <div class="modal-overlay" id="modal-add" onclick="if(event.target===this)closeAddModal()">
   <div class="modal">
@@ -1510,77 +1661,7 @@ header{
     </div>
   </div>
 </div>
-<!-- ADD/EDIT BH -->
-<div class="modal-overlay" id="modal-bh-add" onclick="if(event.target===this)closeAddModal()">
-  <div class="modal">
-    <div class="modal-title" id="add-modal-title">🕳️ Thêm Hố Khoan</div>
-    <div class="form-group">
-      <label class="form-label">Hố khoan (HK)</label>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <select class="form-select" id="bh-select" style="flex:1;" onchange="onHkSelect()"><option value="">— Chọn HK đã có —</option></select>
-        <input class="form-input" id="bh-new" placeholder="Hoặc nhập HK mới..." style="flex:1;"/>
-      </div>
-    </div>
-    <div class="form-group"><label class="form-label">Mô tả</label><input class="form-input" id="bh-f-desc" placeholder="VD: Sét lẫn cát"/></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:var(--border);">
-      <button class="btn btn-ghost" onclick="closeAddModal()">Hủy</button>
-      <button class="btn btn-primary" id="add-modal-btn" onclick="saveModalSample()">✓ Thêm mẫu</button>
-    </div>
-  </div>
-</div>
 
-<!-- IMPORT MODAL BH-->
-<div class="modal-overlay" id="modal-import" onclick="if(event.target===this)closeImportModal()">
-  <div class="modal modal-xl">
-    <div class="modal-title">📋 Import từ Excel</div>
-    <div class="form-group"><label class="form-label">Dán dữ liệu từ Excel</label><textarea id="excel-paste" rows="4" style="width:100%;padding:7px 10px;background:var(--earth-bg);border:var(--border-md);border-radius:var(--r-sm);font-family:var(--font-ui);font-size:.78rem;resize:vertical;outline:none;" placeholder="Ctrl+V để dán từ Excel vào đây..." oninput="parseAndRenderImport()"></textarea></div>
-    <div id="import-summary" class="import-summary"></div>
-    <div class="import-table-wrap" id="import-table-wrap" style="display:none;">
-      <table class="import-table"><thead><tr><th style="width:28px;">#</th><th>Số hiệu</th><th>Hố khoan</th><th>Ký hiệu</th><th>Độ sâu</th><th>Tên biểu</th><th>Mô tả</th><th>Loại TN</th><th style="width:60px;">TT</th></tr></thead><tbody id="import-tbody"></tbody></table>
-    </div>
-    <div style="display:flex;gap:7px;justify-content:flex-end;margin-top:12px;padding-top:12px;border-top:var(--border);">
-      <button class="btn btn-ghost btn-sm" onclick="addImportRow()">+ Thêm dòng</button>
-      <button class="btn btn-ghost" onclick="closeImportModal()">Hủy</button>
-      <button class="btn btn-sky" id="import-btn" onclick="doImport()" disabled>⬇ Import mẫu hợp lệ</button>
-    </div>
-  </div>
-</div>
-
-<!-- BULK TICK MODAL BH-->
-<div class="modal-overlay" id="modal-bh-bulk" onclick="if(event.target===this)closeBulkModal()">
-  <div class="modal modal-xl bulk-modal">
-    <div class="modal-title">☑ Thao tác hàng loạt</div>
-    <div class="hint-box">Chọn <b>Hố Khoan</b> (trái) → chọn hành động bên dưới. Để tick công đoạn: chọn thêm <b>công đoạn</b> (phải) rồi nhấn Áp dụng tick.</div>
-    <div class="bulk-grid">
-      <div>
-        <div class="bulk-section-title">① Chọn Hố Khoan</div>
-        <div class="bulk-toolbar">
-          <button class="btn btn-ghost btn-sm" onclick="bulkSelAllSamples(true)">Tất cả</button>
-          <button class="btn btn-ghost btn-sm" onclick="bulkSelAllSamples(false)">Bỏ chọn</button>
-          <span class="cnt-badge" id="b-sc">0 mẫu</span>
-        </div>
-        <div class="sample-sel-list" id="bulk-samples"></div>
-      </div>
-      <div>
-        <div class="bulk-section-title">② Chọn công đoạn (cho tick)</div>
-        <div class="bulk-toolbar">
-          <button class="btn btn-ghost btn-sm" onclick="bulkSelAllSteps(true)">Tất cả</button>
-          <button class="btn btn-ghost btn-sm" onclick="bulkSelAllSteps(false)">Bỏ chọn</button>
-          <span class="cnt-badge" id="b-stc">0 bước</span>
-        </div>
-        <div id="bulk-steps" style="max-height:310px;overflow-y:auto;"></div>
-      </div>
-    </div>
-    <div class="bulk-action-bar">
-      <span class="bar-label" id="b-preview">Chọn Hố Khoan để thao tác</span>
-      <button class="btn btn-moss btn-sm" onclick="applyBulk()">✓ Tick</button>
-      <button class="btn btn-ghost btn-sm" onclick="applyBulkUntick()" style="border-color:var(--rust);color:var(--rust);">✕ Bỏ tick</button>
-      <button class="btn btn-sky btn-sm" onclick="bulkArchive()">🗄️ Lưu trữ</button>
-      <button class="btn btn-rust btn-sm" onclick="bulkDelete()">🗑️ Xóa</button>
-      <button class="btn btn-ghost btn-sm" onclick="closeBulkModal()">Đóng</button>
-    </div>
-  </div>
-</div>
 <!-- AUTH MODAL -->
 <div class="modal-overlay" id="modal-auth" onclick="if(event.target===this)closeAuthModal()">
   <div class="auth-card">
@@ -1659,7 +1740,7 @@ try{
 
 function loadFromFirestore(){
   if(!fbReady||!db)return;
-  Promise.all([db.collection('ptn_samples').get(),db.collection('ptn_archived').get(),db.collection('ptn_deleted').get(),db.collection('ptn_boreholes').get(),db.collection('ptn_boreholes_archived').get().catch(function(){return{forEach:function(){}};})]).then(function(r){
+  Promise.all([db.collection('ptn_samples').get(),db.collection('ptn_archived').get(),db.collection('ptn_deleted').get().catch(function(){return{forEach:function(){}};})]).then(function(r){
     var fS=[],fA=[],fD=[];
     r[0].forEach(function(d){fS.push(Object.assign({},d.data(),{fsId:d.id}));});
     r[1].forEach(function(d){fA.push(Object.assign({},d.data(),{fsId:d.id}));});
@@ -1706,14 +1787,7 @@ function closeAuthModal(){document.getElementById('modal-auth').classList.remove
 function updateUserUI(user){document.getElementById('user-name').textContent=user?((user.displayName||user.email||'').split(' ').pop()):'Khách';document.getElementById('auth-btn').textContent=user?'Đăng xuất':'Đăng nhập';}
 
 var samples=[],archived=[],trashed=[],hkList=[];
-var boreholes = [], archivedBoreholes = [];
-var BH_STEPS = ['yeucau','hinhtru','thínghiem','nhapso','xuly','chuphinh'];
-var BH_STEP_LABELS = {
-  'yeucau':'Yêu cầu TN','hinhtru':'Hình trụ/Mặt cắt',
-  'thínghiem':'Thí nghiệm','nhapso':'Nhập số liệu',
-  'xuly':'Xử lý','chuphinh':'Chụp hình'
-};
-var APPS_SCRIPT="https://script.google.com/macros/s/AKfycbyOT1qP3OTTXy-X6dRAJKuZS1HKTVVTqxMKgn3IxyiZks99kTcQcMiy0hiJ6QuCAUQ/exec";
+var APPS_SCRIPT="https://script.google.com/macros/s/AKfycbz5Stw3TzQxT2M-7Y4kcYFwrCgdTB6WqxLZDZfbx6Y3Xv5llRdKpQWlyWLYs--ww9q9/exec";
 
 var WF_SPINE=[{id:'s_start',l:'Soạn mẫu'},{id:'s_prep',l:'Chuẩn bị yêu cầu TN'},{id:'s_push',l:'Mở mẫu'}];
 var WF_BRANCHES=[
@@ -1734,11 +1808,6 @@ var BRANCHES=[
 ];
 
 function calcPct(s){return Math.round(ALL_STEP_IDS.filter(function(id){return s.steps&&s.steps[id];}).length/ALL_STEP_IDS.length*100);}
-function calcBhPct(b){
-  return Math.round(BH_STEPS.filter(function(id){
-    return b.steps && b.steps[id];
-  }).length / BH_STEPS.length * 100);
-}
 function saveLocal(){}
 function loadLocal(){samples=[];archived=[];trashed=[];hkList=[];}
 function buildHkList(){var s={};samples.concat(archived).forEach(function(x){if(x.hk)s[x.hk]=1;});hkList=Object.keys(s);}
@@ -1746,7 +1815,7 @@ function buildHkList(){var s={};samples.concat(archived).forEach(function(x){if(
 if(fbReady)loadFromFirestore();
 else{renderSamples();renderArchive();updateStats();updateTrashBadge();}
 
-function showSection(name,btn){document.querySelectorAll('.content-section').forEach(function(s){s.classList.remove('active');});document.querySelectorAll('.side-btn').forEach(function(b){b.classList.remove('active');});document.getElementById('section-'+name).classList.add('active');btn.classList.add('active');if(name==='archive')renderArchive();if(name==='today'){renderToday();bdRefreshChips();renderBoard();}if(name==='trash')renderTrash();if(name!=='today')closeBdPanel();}
+function showSection(name,btn){document.querySelectorAll('.content-section').forEach(function(s){s.classList.remove('active');});document.querySelectorAll('.side-btn').forEach(function(b){b.classList.remove('active');});document.getElementById('section-'+name).classList.add('active');btn.classList.add('active');if(name==='archive')renderArchive();if(name==='hokhoan')renderHkList();if(name==='today'){renderToday();bdRefreshChips();renderBoard();}if(name==='trash')renderTrash();if(name!=='today')closeBdPanel();}
 function updateStats(){document.getElementById('stat-active').textContent=samples.length;document.getElementById('stat-done').textContent=archived.length;}
 
 var editingUid=null;
@@ -1802,51 +1871,7 @@ function renderSamples(){
   document.getElementById('empty-samples').style.display=filtered.length?'none':'block';
   filtered.forEach(function(s){list.appendChild(buildCard(s));});
 }
-function openBhAddModal(){editingUid=null;document.getElementById('add-modal-title').textContent='🧪 Thêm Hố Khoan';document.getElementById('add-modal-btn').textContent='✓ Thêm HK';['hk-new','f-desc'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('hk-select').value='';document.querySelectorAll('input[name="tn"]').forEach(function(c){c.checked=false;});updateHkSelect();document.getElementById('modal-add').classList.add('open');}
-function openBhEditModal(uid){var s=samples.find(function(x){return x.uid===uid;});if(!s)return;editingUid=uid;document.getElementById('add-modal-title').textContent='✏️ Chỉnh sửa';document.getElementById('add-modal-btn').textContent='✓ Lưu thay đổi';updateHkSelect();document.getElementById('hk-select').value='';document.getElementById('hk-new').value=s.hk||'';document.getElementById('f-desc').value=s.desc||'';document.querySelectorAll('input[name="tn"]').forEach(function(c){c.checked=(s.types||[]).indexOf(c.value)>=0;});document.getElementById('modal-add').classList.add('open');}
-function closeAddBhModal(){document.getElementById('modal-add').classList.remove('open');editingUid=null;}
-function saveBhModal(){
-  if(!requireAuth())return;
-  var hk=document.getElementById('hk-select').value||document.getElementById('hk-new').value.trim();
-  var desc=document.getElementById('f-desc').value.trim();
-  var types=Array.from(document.querySelectorAll('input[name="tn"]:checked')).map(function(c){return c.value;});
-  if(hkList.indexOf(hk)<0)hkList.push(hk);
-  if(editingUid!==null){
-    var s=samples.find(function(x){return x.uid===editingUid;});
-    if(s){s.hk=hk;s.id=id;s.code=code;s.depth=depth;s.desc=desc;s.types=types;syncSample(s);logActivity('EDIT_SAMPLE',id,'');renderSamples();}
-  } else {
-    var ns=makeSampleObj(hk,id,code,depth,desc,types);
-    samples.push(ns);syncSample(ns);logActivity('CREATE_SAMPLE',id,'HK:'+hk);renderSamples();updateStats();
-  }
-  closeAddModal();
-}
-function makeBoreholeObj(name,desc){return {uid:Date.now()+(Math.random()*999|0),hk:hk,id:id,code:code||'',depth:depth||'',desc:desc||'',types:types||[],steps:{},open:false,createdAt:new Date().toLocaleDateString('vi-VN'),createdBy:currentUser?(currentUser.displayName||currentUser.email):'Khách'};}
 
-function renderBoreholes(){
-  var list=document.getElementById('sample-list');
-  var q=(document.getElementById('search-box').value||'').toLowerCase();
-  var ft=document.getElementById('filter-type').value||'';
-  var so=document.getElementById('sort-order')?document.getElementById('sort-order').value:'';
-  var filtered=samples.filter(function(s){
-    var m=!q||[s.hk,s.id,s.code,s.desc,s.depth].some(function(v){return(v||'').toLowerCase().includes(q);});
-    var t=!ft||(s.types||[]).includes(ft);
-    return m&&t;
-  });
-  if(so){filtered=filtered.slice().sort(function(a,b){
-    if(so==='id-asc')return(a.id||'').localeCompare(b.id||'',undefined,{numeric:true,sensitivity:'base'});
-    if(so==='id-desc')return(b.id||'').localeCompare(a.id||'',undefined,{numeric:true,sensitivity:'base'});
-    if(so==='pct-asc')return calcPct(a)-calcPct(b);
-    if(so==='pct-desc')return calcPct(b)-calcPct(a);
-    if(so==='hk-asc')return(a.hk||'').localeCompare(b.hk||'',undefined,{numeric:true,sensitivity:'base'});
-    if(so==='hk-desc')return(b.hk||'').localeCompare(a.hk||'',undefined,{numeric:true,sensitivity:'base'});
-    function parseDate(s){var p=(s||'').split('/');return p.length===3?new Date(p[2],p[1]-1,p[0]):new Date(0);}
-    var da=parseDate(a.createdAt),db=parseDate(b.createdAt);
-    return so==='date-asc'?da-db:db-da;
-  });}
-  list.querySelectorAll('.sample-item').forEach(function(el){el.remove();});
-  document.getElementById('empty-samples').style.display=filtered.length?'none':'block';
-  filtered.forEach(function(s){list.appendChild(buildCard(s));});
-}
 function buildCard(s){
   var pct=calcPct(s);
   var item=document.createElement('div');item.className='sample-item';item.id='card-'+s.uid;
@@ -1878,36 +1903,7 @@ function buildCard(s){
   if(s.open)body.appendChild(buildWorkflowShell(s));
   return item;
 }
-function buildBhCard(bh){
-  var pct=calcBhPct(b);
-  var item=document.createElement('div');item.className='sample-item';item.id='card-'+s.uid;
-  var tags=allTypes.map(function(t){var on=(s.types||[]).includes(t);return '<span class="type-tag '+(on?'on':'off')+'">'+t.toUpperCase()+'</span>';}).join('');
-  var depthBadge=s.depth?'<span class="depth-badge">⬇ '+s.depth+'m</span>':'';
-  var fc=pct===100?'pbar-fill done':'pbar-fill';
-  item.innerHTML=
-    '<div class="sample-header">'+
-      '<span class="s-id">'+s.id+'</span>'+
-      '<div class="s-name" onclick="toggleCard('+s.uid+')">'+
-        '<div>'+s.hk+(s.code?' <span style="color:#b0a080;font-weight:400">· '+s.code+'</span>':'')+'</div>'+
-        '<div class="s-sub">'+depthBadge+(s.desc||'Không có mô tả')+'</div>'+
-      '</div>'+
-      '<div class="s-types">'+tags+'</div>'+
-      '<div class="s-progress"><div class="pbar"><div class="'+fc+'" id="pf-'+s.uid+'" style="width:'+pct+'%"></div></div><span class="pct" id="pp-'+s.uid+'">'+pct+'%</span></div>'+
-      '<div class="s-actions">'+
-        '<button class="icon-btn" title="Mở/đóng" onclick="toggleCard('+s.uid+')">▾</button>'+
-        '<button class="icon-btn" title="Chỉnh sửa" onclick="openEditModal('+s.uid+')">✏️</button>'+
-        '<button class="icon-btn del" title="Xóa HK" onclick="deleteSamplePrompt('+s.uid+')">🗑️</button>'+
-      '</div>'+
-    '</div>'+
-    '<div class="sample-body'+(s.open?' open':'')+'" id="body-'+s.uid+'"></div>'+
-    '<div class="sample-footer">'+
-      '<span class="footer-who">'+(s.createdBy?'Tạo bởi: '+s.createdBy:'')+(s.depth?' · ⬇ '+s.depth+'m':'')+'</span>'+
-      '<button class="btn btn-ghost btn-sm" onclick="archivePrompt('+s.uid+',false)">🗄️ Lưu trữ</button>'+
-    '</div>';
-  var body=item.querySelector('#body-'+s.uid);
-  if(s.open)body.appendChild(buildWorkflowShell(s));
-  return item;
-}
+
 function buildWorkflowShell(s){
   var shell=document.createElement('div');
   shell.className='wf-shell';
@@ -2085,15 +2081,42 @@ function renderTrash(){
   var sorted=trashed.slice().sort(function(a,b){return new Date(b.deletedAtISO||0)-new Date(a.deletedAtISO||0);});
   list.innerHTML='';
   sorted.forEach(function(s){
-    var div=document.createElement('div');div.className='trash-item';
-    div.innerHTML='<div class="trash-meta"><div class="t-id">'+s.id+' <span style="color:#b0a080;font-weight:400;font-size:.78rem;">· '+s.hk+'</span></div><div class="t-sub">'+(s.desc||'')+(s.depth?' · ⬇ '+s.depth+'m':'')+' · Loại: '+((s.types||[]).join(', ')||'—')+'</div></div>'+
-      '<span class="trash-del-at">🗑 '+(s.deletedAt||'')+'</span>'+
-      '<div style="display:flex;gap:5px;flex-shrink:0;"><button class="btn btn-sky btn-sm" onclick="restoreFromTrash('+s.uid+')">↩ Phục hồi</button><button class="btn btn-rust btn-sm" onclick="permDeletePrompt('+s.uid+')">✕ Xóa vĩnh viễn</button></div>';
-    list.appendChild(div);
-  });
+  var isHk=s.type==='hk';
+  var div=document.createElement('div');div.className='trash-item';
+  var displayId=isHk?s.name:s.id;
+  var displaySub=isHk?((s.project||'')+(s.location?' · '+s.location:'')):((s.desc||'')+(s.depth?' · ⬇ '+s.depth+'m':''));
+  div.innerHTML='<div class="trash-meta"><div class="t-id">'+(isHk?'🕳️ ':'🧪 ')+displayId+'</div><div class="t-sub">'+displaySub+'</div></div>'+
+    '<span class="trash-del-at">🗑 '+(s.deletedAt||'')+'</span>'+
+    '<div style="display:flex;gap:5px;flex-shrink:0;"><button class="btn btn-sky btn-sm" onclick="restoreFromTrash('+(isHk?'\'hk\','+s.uid:s.uid)+')">↩ Phục hồi</button><button class="btn btn-rust btn-sm" onclick="permDeletePrompt('+(isHk?'\'hk\','+s.uid:s.uid)+')">✕ Xóa vĩnh viễn</button></div>';
+  list.appendChild(div);
+});
 }
-function restoreFromTrash(uid){var idx=trashed.findIndex(function(x){return x.uid===uid;});if(idx<0)return;var s=trashed.splice(idx,1)[0];delete s.deletedAt;delete s.deletedAtISO;samples.push(s);syncSample(s);if(fbReady&&db)db.collection('ptn_deleted').doc('d_'+uid).delete().catch(function(){});logActivity('RESTORE_SAMPLE',s.id,'từ thùng rác');renderSamples();renderTrash();updateStats();updateTrashBadge();}
-function permDeletePrompt(uid){var s=trashed.find(function(x){return x.uid===uid;});if(!s)return;document.getElementById('confirm-title').textContent='⚠️ Xóa vĩnh viễn?';document.getElementById('confirm-msg').textContent='Xóa hẳn mẫu "'+s.id+'" khỏi Firestore. KHÔNG thể hoàn tác.';document.getElementById('confirm-ok-btn').className='btn btn-rust';document.getElementById('confirm-ok-btn').textContent='✕ Xóa vĩnh viễn';confirmAction=function(){trashed=trashed.filter(function(x){return x.uid!==uid;});if(fbReady&&db){db.collection('ptn_deleted').doc('d_'+uid).delete().catch(function(){});db.collection('ptn_samples').doc('s_'+uid).delete().catch(function(){});db.collection('ptn_archived').doc('a_'+uid).delete().catch(function(){});}logActivity('PERM_DELETE',s.id,'');renderTrash();updateTrashBadge();};document.getElementById('confirm-overlay').classList.add('open');}
+function restoreFromTrash(typeOrUid,uid2){
+  var isHk=typeOrUid==='hk';var uid=isHk?uid2:typeOrUid;
+  var idx=trashed.findIndex(function(x){return x.uid===uid;});if(idx<0)return;
+  var s=trashed.splice(idx,1)[0];delete s.deletedAt;delete s.deletedAtISO;delete s.type;
+  if(isHk){hoKhoanList.push(s);syncHk(s);if(fbReady&&db)db.collection('ptn_deleted').doc('dhk_'+uid).delete().catch(function(){});renderHkList();}
+  else{samples.push(s);syncSample(s);if(fbReady&&db)db.collection('ptn_deleted').doc('d_'+uid).delete().catch(function(){});renderSamples();}
+  renderTrash();updateStats();updateTrashBadge();
+}
+function permDeletePrompt(typeOrUid,uid2){
+  var isHk=typeOrUid==='hk';var uid=isHk?uid2:typeOrUid;
+  var s=trashed.find(function(x){return x.uid===uid;});if(!s)return;
+  document.getElementById('confirm-title').textContent='⚠️ Xóa vĩnh viễn?';
+  document.getElementById('confirm-msg').textContent='Xóa hẳn "'+(s.name||s.id)+'" khỏi Firestore. KHÔNG thể hoàn tác.';
+  document.getElementById('confirm-ok-btn').className='btn btn-rust';
+  document.getElementById('confirm-ok-btn').textContent='✕ Xóa vĩnh viễn';
+  confirmAction=function(){
+    trashed=trashed.filter(function(x){return x.uid!==uid;});
+    if(fbReady&&db){
+      db.collection('ptn_deleted').doc((isHk?'dhk_':'d_')+uid).delete().catch(function(){});
+      if(!isHk){db.collection('ptn_samples').doc('s_'+uid).delete().catch(function(){});db.collection('ptn_archived').doc('a_'+uid).delete().catch(function(){});}
+      else{db.collection('ptn_hokhoan').doc('hk_'+uid).delete().catch(function(){});db.collection('ptn_hokhoan_archived').doc('hka_'+uid).delete().catch(function(){});}
+    }
+    renderTrash();updateTrashBadge();
+  };
+  document.getElementById('confirm-overlay').classList.add('open');
+}
 function emptyTrashPrompt(){if(!trashed.length){alert('Thùng rác đã trống!');return;}document.getElementById('confirm-title').textContent='⚠️ Dọn sạch thùng rác?';document.getElementById('confirm-msg').textContent='Xóa vĩnh viễn '+trashed.length+' mẫu. KHÔNG thể hoàn tác.';document.getElementById('confirm-ok-btn').className='btn btn-rust';document.getElementById('confirm-ok-btn').textContent='✕ Xóa tất cả '+trashed.length+' mẫu';confirmAction=function(){if(fbReady&&db){trashed.forEach(function(s){db.collection('ptn_deleted').doc('d_'+s.uid).delete().catch(function(){});db.collection('ptn_samples').doc('s_'+s.uid).delete().catch(function(){});db.collection('ptn_archived').doc('a_'+s.uid).delete().catch(function(){});});}trashed=[];logActivity('EMPTY_TRASH','','');renderTrash();updateTrashBadge();};document.getElementById('confirm-overlay').classList.add('open');}
 function doArchive(uid){var idx=samples.findIndex(function(x){return x.uid===uid;});if(idx<0)return;var s=samples.splice(idx,1)[0];s.archivedAt=new Date().toLocaleDateString('vi-VN');archived.push(s);_pendingDelete[uid]=true;var card=document.getElementById('card-'+uid);if(card)card.remove();if(!samples.length)document.getElementById('empty-samples').style.display='block';updateStats();deleteSampleDoc(s);syncArchived(s);logActivity('ARCHIVE_SAMPLE',s.id,'');renderArchive();}
 
@@ -2118,17 +2141,7 @@ function archiveBulkSelAll(val){archived.forEach(function(s){archiveSel[s.uid]=v
 function archiveBulkRestore(){var uids=Object.keys(archiveSel).filter(function(k){return archiveSel[k];});if(!uids.length){alert('Chọn ít nhất 1 mẫu!');return;}uids.forEach(function(uid){restoreSample(Number(uid));});archiveSel={};renderArchive();}
 function archiveBulkDeletePrompt(){var uids=Object.keys(archiveSel).filter(function(k){return archiveSel[k];});if(!uids.length){alert('Chọn ít nhất 1 mẫu!');return;}var names=uids.map(function(uid){var s=archived.find(function(x){return x.uid==uid;});return s?s.id:'?';}).join(', ');document.getElementById('confirm-title').textContent='🗑️ Chuyển vào thùng rác?';document.getElementById('confirm-msg').textContent='Chuyển '+uids.length+' mẫu: '+names;document.getElementById('confirm-ok-btn').className='btn btn-rust';document.getElementById('confirm-ok-btn').textContent='🗑️ Chuyển '+uids.length+' mẫu';confirmAction=function(){uids.forEach(function(uid){var s=archived.find(function(x){return x.uid==uid;});archived=archived.filter(function(x){return x.uid!=uid;});if(s){s.deletedAt=new Date().toLocaleDateString('vi-VN');s.deletedAtISO=new Date().toISOString();trashed.push(s);if(fbReady&&db){db.collection('ptn_archived').doc('a_'+uid).delete().catch(function(){});db.collection('ptn_deleted').doc('d_'+uid).set(s).catch(function(){});}}});archiveSel={};renderArchive();updateTrashBadge();updateStats();};document.getElementById('confirm-overlay').classList.add('open');}
 function restoreSample(uid){var idx=archived.findIndex(function(s){return s.uid===uid;});if(idx<0)return;var s=archived.splice(idx,1)[0];if(fbReady&&db)db.collection('ptn_archived').doc(s.fsId||('a_'+uid)).delete().catch(function(){});delete s.archivedAt;samples.push(s);syncSample(s);renderSamples();renderArchive();updateStats();}
-// Sync boreholes
-function syncBorehole(b) {
-  if(!fbReady||!db) return;
-  db.collection('ptn_boreholes').doc('bh_'+b.uid).set(
-    Object.assign({},b,{updatedAt:firebase.firestore.FieldValue.serverTimestamp()}),
-    {merge:true}
-  );
-}
-function syncArchivedBorehole(b) {
-  db.collection('ptn_boreholes_archived').doc('abh_'+b.uid).set(b,{merge:true});
-}
+
 var importData=[];
 function openImportModal(){importData=[];document.getElementById('excel-paste').value='';document.getElementById('import-tbody').innerHTML='';document.getElementById('import-table-wrap').style.display='none';document.getElementById('import-summary').innerHTML='';document.getElementById('import-btn').disabled=true;document.getElementById('modal-import').classList.add('open');}
 function closeImportModal(){document.getElementById('modal-import').classList.remove('open');}
@@ -2197,12 +2210,7 @@ function closeProfileModal(){document.getElementById('modal-profile').classList.
 var ACTION_META={'CREATE_SAMPLE':{icon:'➕',label:'Tạo mẫu',badge:'create'},'EDIT_SAMPLE':{icon:'✏️',label:'Sửa mẫu',badge:'edit'},'ARCHIVE_SAMPLE':{icon:'🗄️',label:'Lưu trữ',badge:'archive'},'DELETE_SAMPLE':{icon:'🗑️',label:'Xóa mẫu',badge:'delete'},'BULK_TICK':{icon:'☑',label:'Tick hàng loạt',badge:'tick'},'TICK_STEP':{icon:'✓',label:'Tick bước',badge:'tick'},'FINISH_SAMPLE':{icon:'🏁',label:'Hoàn thành',badge:'tick'},'IMPORT_EXCEL':{icon:'📋',label:'Import Excel',badge:'import'},'CAMERA_UPLOAD':{icon:'📷',label:'Upload ảnh',badge:'camera'},'RESTORE_SAMPLE':{icon:'↩',label:'Phục hồi',badge:'restore'}};
 function renderProfileModal(){var who=currentUser?(currentUser.displayName||currentUser.email||'Khách'):'Khách';var avatar=currentUser&&currentUser.photoURL?'<img src="'+currentUser.photoURL+'" style="width:44px;height:44px;border-radius:var(--r-sm);border:1px solid rgba(193,127,36,.4);object-fit:cover;" />':'<span style="font-size:1.3rem;">👤</span>';document.getElementById('profile-hero-wrap').innerHTML='<div class="profile-hero"><div class="profile-avatar">'+avatar+'</div><div><div class="profile-name">'+who+'</div><div class="profile-sub">'+(currentUser?currentUser.email:'Chưa đăng nhập')+'</div></div></div>';var rawLog=JSON.parse(localStorage.getItem('ptn_log')||'[]');var todayStr=new Date().toLocaleDateString('vi-VN');var todayLog=rawLog.filter(function(e){return new Date(e.at).toLocaleDateString('vi-VN')===todayStr;});document.getElementById('profile-kpi-wrap').innerHTML='<div class="profile-kpi"><div class="pk-val">'+todayLog.length+'</div><div class="pk-lbl">Hôm nay</div></div><div class="profile-kpi"><div class="pk-val">'+rawLog.filter(function(e){return e.action==='CREATE_SAMPLE'||e.action==='IMPORT_EXCEL';}).length+'</div><div class="pk-lbl">Đã tạo mẫu</div></div><div class="profile-kpi"><div class="pk-val">'+rawLog.filter(function(e){return e.action==='ARCHIVE_SAMPLE';}).length+'</div><div class="pk-lbl">Đã lưu trữ</div></div>';var groups={};rawLog.forEach(function(e){var d=new Date(e.at).toLocaleDateString('vi-VN');if(!groups[d])groups[d]=[];groups[d].push(e);});var wrap=document.getElementById('profile-log-wrap');if(!rawLog.length){wrap.innerHTML='<div class="profile-empty">📭 Chưa có hoạt động</div>';return;}var dates=Object.keys(groups).sort(function(a,b){function pd(s){var p=s.split('/');return p.length===3?new Date(p[2],p[1]-1,p[0]):new Date(0);}return pd(b)-pd(a);});wrap.innerHTML='';dates.forEach(function(dateStr){var isToday=dateStr===todayStr;var events=groups[dateStr];var groupEl=document.createElement('div');groupEl.className='day-group';var weekdays=['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];function pdLabel(s){var p=s.split('/');return p.length===3?new Date(p[2],p[1]-1,p[0]):new Date(0);}var wday=isToday?'Hôm nay':weekdays[pdLabel(dateStr).getDay()];groupEl.innerHTML='<div class="day-group-head'+(isToday?' today-head':'')+'" onclick="toggleDayGroup(this)"><span class="dg-date">'+wday+' — '+dateStr+'</span><span class="dg-count">'+events.length+'</span><span class="dg-arrow'+(isToday?' open':'')+'">▾</span></div><div class="day-group-body'+(isToday?' open':'')+'"></div>';var bodyEl=groupEl.querySelector('.day-group-body');events.forEach(function(e){var meta=ACTION_META[e.action]||{icon:'📌',label:e.action,badge:'edit'};var row=document.createElement('div');row.className='act-row';row.innerHTML='<span class="act-icon">'+meta.icon+'</span><div class="act-body"><b>'+(e.sampleId||'')+'</b> <span>'+(e.detail||'')+'</span></div><span class="act-badge '+meta.badge+'">'+meta.label+'</span><span class="act-time">'+new Date(e.at).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})+'</span>';bodyEl.appendChild(row);});wrap.appendChild(groupEl);});}
 function toggleDayGroup(headEl){var body=headEl.nextElementSibling;var arrow=headEl.querySelector('.dg-arrow');var isOpen=body.classList.contains('open');body.classList.toggle('open',!isOpen);if(arrow)arrow.classList.toggle('open',!isOpen);}
-function switchArchiveTab(tab) {
-  document.getElementById('archive-bh-content').style.display = tab==='bh'?'':'none';
-  document.getElementById('archive-samples-content').style.display = tab==='samples'?'':'none';
-  document.getElementById('arch-tab-bh').classList.toggle('active', tab==='bh');
-  document.getElementById('arch-tab-samples').classList.toggle('active', tab==='samples');
-}
+
 // ════════════════════ PIPELINE BOARD ════════════════════
 var bdSelUid=null,bdHk='';
 
@@ -2352,6 +2360,331 @@ updateStats=function(){
   _bdOrigUpdateStats.apply(this,arguments);
   if(document.getElementById('section-today')&&document.getElementById('section-today').classList.contains('active'))renderBoard();
 };
+// 1. Tính tiền Photoshop
+function calculatePsTotal() {
+    var qty = parseInt(document.getElementById('ps-quantity').value) || 0;
+    var total = qty * 2000;
+    document.getElementById('ps-total-price').textContent = total.toLocaleString('vi-VN') + 'đ';
+    return total;
+}
+
+// 2. Gửi yêu cầu
+function submitPsOrder() {
+    var qty = document.getElementById('ps-quantity').value;
+    var note = document.getElementById('ps-request-note').value;
+    var total = calculatePsTotal();
+    var who = currentUser ? (currentUser.displayName || currentUser.email) : 'Khách ẩn danh';
+
+    if (qty < 1) {
+        alert('Vui lòng chọn số lượng tấm ảnh!');
+        return;
+    }
+
+    // Tạo QR Code động (Sử dụng API VietQR miễn phí)
+    // Thay STK_CUA_BAN, TEN_NGAN_HANG bằng thông tin thực tế của bạn
+    var bankID = "MB"; // Ví dụ MB Bank
+    var accountNo = "0901234567"; // Số điện thoại hoặc số tài khoản
+    var description = encodeURIComponent("PTS " + qty + " tam - " + who);
+    var qrUrl = `https://img.vietqr.io/image/${bankID}-${accountNo}-compact2.png?amount=${total}&addInfo=${description}`;
+    
+    document.getElementById('qr-code-img').src = qrUrl;
+    document.getElementById('qr-price').textContent = "Số tiền: " + total.toLocaleString('vi-VN') + "đ";
+    document.getElementById('modal-payment').classList.add('open');
+// GỬI DỮ LIỆU SANG APPS SCRIPT ĐỂ GỬI EMAIL THÔNG BÁO
+   var APPS_SCRIPT_MAIL="https://script.google.com/macros/s/AKfycbyFIXw_XBhmAFxac_WmQSE2mKAPp4XA1C_3pSjFRGTj1WMphwtyp1YsU1NFAR_Aqgp0aA/exec";
+    var payload = {
+        action: "PHOTOSHOP_REQUEST", // Biến để Apps Script nhận diện gửi email
+        details: {
+            user: who,
+            quantity: qty,
+            note: note,
+            total: total
+        }
+    };
+
+    fetch(APPS_SCRIPT_MAIL, {
+    method: 'POST',
+    body: JSON.stringify(payload)  // gửi thẳng, không set Content-Type
+})
+.then(res => res.json())
+.then(data => console.log("Email notify status:", data))
+.catch(err => console.warn("Email notify failed", err));
+}
+function confirmPsPayment() {
+    alert("Cảm ơn bạn! Yêu cầu chỉnh sửa đã được ghi nhận. Chúng tôi sẽ xử lý và phản hồi qua Drive/Zalo sớm nhất.");
+    document.getElementById('modal-payment').classList.remove('open');
+    logActivity('CAMERA_UPLOAD', 'Yêu cầu Photoshop', document.getElementById('ps-quantity').value + ' tấm');
+}
+   // ══════════════════ HO KHOAN MODULE ══════════════════
+var hoKhoanList=[], hoKhoanArchived=[];
+
+var HK_STEPS=[
+  {id:'hks_yctn',l:'Yêu cầu TN'},
+  {id:'hks_hinhtru',l:'Hình trụ/Mặt cắt'},
+  {id:'hks_tn',l:'Thí nghiệm'},
+  {id:'hks_nhapso',l:'Nhập số'},
+  {id:'hks_xuly',l:'Xử lý'},
+  {id:'hks_chuphinh',l:'Chụp hình'}
+];
+var HK_STEP_IDS=HK_STEPS.map(function(s){return s.id;});
+
+function calcHkPct(h){return Math.round(HK_STEP_IDS.filter(function(id){return h.steps&&h.steps[id];}).length/HK_STEP_IDS.length*100);}
+function syncHk(h){if(!fbReady||!db)return;var id='hk_'+h.uid;h.fsId=id;db.collection('ptn_hokhoan').doc(id).set(Object.assign({},h,{updatedAt:firebase.firestore.FieldValue.serverTimestamp()}),{merge:true}).catch(function(e){console.warn(e);});}
+function syncHkArchived(h){if(!fbReady||!db)return;var id='hka_'+h.uid;h.fsId=id;db.collection('ptn_hokhoan_archived').doc(id).set(h,{merge:true}).catch(function(e){console.warn(e);});}
+
+// Load HK from Firestore on startup
+(function loadHk(){
+  if(!fbReady||!db)return;
+  Promise.all([
+    db.collection('ptn_hokhoan').get().catch(function(){return{forEach:function(){}};}),
+    db.collection('ptn_hokhoan_archived').get().catch(function(){return{forEach:function(){}};})
+  ]).then(function(r){
+    r[0].forEach(function(d){hoKhoanList.push(Object.assign({},d.data(),{fsId:d.id}));});
+    r[1].forEach(function(d){hoKhoanArchived.push(Object.assign({},d.data(),{fsId:d.id}));});
+    renderHkList();updateStats();
+  });
+})();
+
+// Override updateStats to include HK count
+var _origUpdateStats=updateStats;
+updateStats=function(){
+  _origUpdateStats.apply(this,arguments);
+  var hkEl=document.getElementById('stat-hk');
+  if(hkEl)hkEl.textContent=hoKhoanList.length;
+  var hkCnt=document.getElementById('atab-hk-cnt');
+  var sCnt=document.getElementById('atab-sample-cnt');
+  if(hkCnt)hkCnt.textContent=hoKhoanArchived.length;
+  if(sCnt)sCnt.textContent=archived.length;
+};
+
+// Override showSection to handle hokhoan
+var _origShowSection=showSection;
+showSection=function(name,btn){
+  _origShowSection(name,btn);
+  if(name==='archive'){renderHkArchive();}
+};
+
+// ADD/EDIT MODAL
+var editingHkUid=null;
+function openHkAddModal(){editingHkUid=null;document.getElementById('hk-add-modal-title').textContent='🕳️ Thêm hố khoan';document.getElementById('hk-add-modal-btn').textContent='✓ Thêm hố khoan';['hk-f-name','hk-f-project','hk-f-location','hk-f-depth','hk-f-note'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('modal-hk-add').classList.add('open');}
+function openHkEditModal(uid){var h=hoKhoanList.find(function(x){return x.uid===uid;});if(!h)return;editingHkUid=uid;document.getElementById('hk-add-modal-title').textContent='✏️ Chỉnh sửa hố khoan';document.getElementById('hk-add-modal-btn').textContent='✓ Lưu thay đổi';document.getElementById('hk-f-name').value=h.name||'';document.getElementById('hk-f-project').value=h.project||'';document.getElementById('hk-f-location').value=h.location||'';document.getElementById('hk-f-depth').value=h.depth||'';document.getElementById('hk-f-note').value=h.note||'';document.getElementById('modal-hk-add').classList.add('open');}
+function closeHkAddModal(){document.getElementById('modal-hk-add').classList.remove('open');editingHkUid=null;}
+function saveHkModal(){
+  if(!requireAuth())return;
+  var name=document.getElementById('hk-f-name').value.trim();
+  if(!name){alert('Vui lòng nhập tên hố khoan!');return;}
+  var obj={project:document.getElementById('hk-f-project').value.trim(),location:document.getElementById('hk-f-location').value.trim(),depth:document.getElementById('hk-f-depth').value.trim(),note:document.getElementById('hk-f-note').value.trim()};
+  if(editingHkUid!==null){
+    var h=hoKhoanList.find(function(x){return x.uid===editingHkUid;});
+    if(h){h.name=name;Object.assign(h,obj);syncHk(h);logActivity('EDIT_HK',name,'');renderHkList();}
+  } else {
+    var nh=Object.assign({uid:Date.now()+(Math.random()*999|0),name:name,steps:{},open:false,createdAt:new Date().toLocaleDateString('vi-VN'),createdBy:currentUser?(currentUser.displayName||currentUser.email):'Khách'},obj);
+    hoKhoanList.push(nh);syncHk(nh);logActivity('CREATE_HK',name,'');renderHkList();updateStats();
+  }
+  closeHkAddModal();
+}
+
+// RENDER HK LIST
+function renderHkList(){
+  var list=document.getElementById('hk-list');if(!list)return;
+  var q=(document.getElementById('hk-search-box')?document.getElementById('hk-search-box').value||'':'').toLowerCase();
+  var so=(document.getElementById('hk-sort-order')?document.getElementById('hk-sort-order').value:'');
+  var filtered=hoKhoanList.filter(function(h){return !q||[h.name,h.project,h.location,h.note].some(function(v){return(v||'').toLowerCase().includes(q);});});
+  if(so){filtered=filtered.slice().sort(function(a,b){
+    if(so==='id-asc')return(a.name||'').localeCompare(b.name||'',undefined,{numeric:true,sensitivity:'base'});
+    if(so==='id-desc')return(b.name||'').localeCompare(a.name||'',undefined,{numeric:true,sensitivity:'base'});
+    if(so==='pct-asc')return calcHkPct(a)-calcHkPct(b);
+    if(so==='pct-desc')return calcHkPct(b)-calcHkPct(a);
+    function pd(s){var p=(s||'').split('/');return p.length===3?new Date(p[2],p[1]-1,p[0]):new Date(0);}
+    return so==='date-asc'?pd(a.createdAt)-pd(b.createdAt):pd(b.createdAt)-pd(a.createdAt);
+  });}
+  list.querySelectorAll('.hk-item').forEach(function(el){el.remove();});
+  document.getElementById('empty-hk').style.display=filtered.length?'none':'block';
+  filtered.forEach(function(h){list.appendChild(buildHkCard(h));});
+}
+
+function buildHkCard(h){
+  var pct=calcHkPct(h);
+  var item=document.createElement('div');item.className='hk-item';item.id='hkcard-'+h.uid;
+  var stepsHtml=HK_STEPS.map(function(step){
+    var chk=!!(h.steps&&h.steps[step.id]);
+    return '<div class="hk-step-node'+(chk?' checked':'')+'" id="hknode-'+h.uid+'-'+step.id+'"><div class="hk-step-chk">'+(chk?'✓':'')+'</div><span>'+step.l+'</span></div>';
+  }).join('');
+  var fc=pct===100?'pbar-fill done':'pbar-fill';
+  item.innerHTML=
+    '<div class="sample-header" style="grid-template-columns:auto 1fr auto auto;">'+
+      '<span class="hk-id">'+h.name+'</span>'+
+      '<div class="s-name" onclick="toggleHkCard('+h.uid+')">'+
+        '<div>'+(h.project||'Chưa có dự án')+(h.location?' <span style="color:#b0a080;font-weight:400;font-size:.82rem;">· '+h.location+'</span>':'')+'</div>'+
+        '<div class="s-sub">'+(h.depth?'⬇ '+h.depth+'m &nbsp;·&nbsp; ':'')+  (h.note||'Chưa có ghi chú')+'</div>'+
+      '</div>'+
+      '<div class="s-progress"><div class="pbar" style="width:80px;"><div class="'+fc+'" id="hkpf-'+h.uid+'" style="width:'+pct+'%;background:var(--sky);"></div></div><span class="pct" id="hkpp-'+h.uid+'" style="color:var(--sky);">'+pct+'%</span></div>'+
+      '<div class="s-actions">'+
+        '<button class="icon-btn" onclick="toggleHkCard('+h.uid+')">▾</button>'+
+        '<button class="icon-btn" onclick="openHkEditModal('+h.uid+')">✏️</button>'+
+        '<button class="icon-btn del" onclick="deleteHkPrompt('+h.uid+')">🗑️</button>'+
+      '</div>'+
+    '</div>'+
+    '<div id="hkbody-'+h.uid+'" style="'+(h.open?'':'display:none;')+'border-top:var(--border);">'+
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;padding:10px 12px;background:var(--earth-bg);" id="hksteps-'+h.uid+'">'+stepsHtml+'</div>'+
+      '<div style="display:flex;align-items:center;gap:9px;padding:4px 12px 8px;background:var(--earth-bg);">'+
+        '<div class="pbar" style="flex:1;height:4px;"><div class="'+fc+'" style="width:'+pct+'%;background:'+(pct===100?'var(--moss)':'var(--sky)')+'"></div></div>'+
+        '<span style="font-size:.66rem;font-weight:700;color:var(--sky);font-family:var(--font-mono);">'+pct+'% &nbsp;'+HK_STEP_IDS.filter(function(id){return h.steps&&h.steps[id];}).length+'/'+HK_STEP_IDS.length+' bước</span>'+
+      '</div>'+
+    '</div>'+
+    '<div class="sample-footer">'+
+      '<span class="footer-who">'+(h.createdBy?'Tạo bởi: '+h.createdBy:'')+(h.createdAt?' · '+h.createdAt:'')+'</span>'+
+      '<button class="btn btn-ghost btn-sm" onclick="archiveHkPrompt('+h.uid+',false)">🗄️ Lưu trữ</button>'+
+    '</div>';
+  // Attach step click events
+  setTimeout(function(){
+    HK_STEPS.forEach(function(step){
+      var node=item.querySelector('#hknode-'+h.uid+'-'+step.id);
+      if(!node)return;
+      node.onclick=function(){
+        if(!requireAuth())return;
+        var hx=hoKhoanList.find(function(x){return x.uid===h.uid;});if(!hx)return;
+        if(!hx.steps)hx.steps={};
+        hx.steps[step.id]=!hx.steps[step.id];
+        syncHk(hx);refreshHkCard(hx);
+        logActivity('TICK_HK_STEP',hx.name,step.id);
+        if(calcHkPct(hx)===100)setTimeout(function(){archiveHkPrompt(hx.uid,true);},700);
+      };
+    });
+  },0);
+  return item;
+}
+
+function refreshHkCard(h){
+  var card=document.getElementById('hkcard-'+h.uid);if(!card)return;
+  var pct=calcHkPct(h);
+  var pf=document.getElementById('hkpf-'+h.uid);var pp=document.getElementById('hkpp-'+h.uid);
+  if(pf){pf.style.width=pct+'%';pf.className=(pct===100?'pbar-fill done':'pbar-fill');}
+  if(pp)pp.textContent=pct+'%';
+  var stepsRow=document.getElementById('hksteps-'+h.uid);
+  if(stepsRow){
+    stepsRow.innerHTML=HK_STEPS.map(function(step){
+      var chk=!!(h.steps&&h.steps[step.id]);
+      return '<div class="hk-step-node'+(chk?' checked':'')+'" id="hknode-'+h.uid+'-'+step.id+'"><div class="hk-step-chk">'+(chk?'✓':'')+'</div><span>'+step.l+'</span></div>';
+    }).join('');
+    HK_STEPS.forEach(function(step){
+      var node=stepsRow.querySelector('#hknode-'+h.uid+'-'+step.id);
+      if(!node)return;
+      node.onclick=function(){
+        if(!requireAuth())return;
+        var hx=hoKhoanList.find(function(x){return x.uid===h.uid;});if(!hx)return;
+        if(!hx.steps)hx.steps={};
+        hx.steps[step.id]=!hx.steps[step.id];
+        syncHk(hx);refreshHkCard(hx);
+        if(calcHkPct(hx)===100)setTimeout(function(){archiveHkPrompt(hx.uid,true);},700);
+      };
+    });
+  }
+}
+
+function toggleHkCard(uid){
+  var body=document.getElementById('hkbody-'+uid);if(!body)return;
+  var h=hoKhoanList.find(function(x){return x.uid===uid;});if(!h)return;
+  var isOpen=body.style.display!=='none';
+  body.style.display=isOpen?'none':'block';h.open=!isOpen;
+}
+
+// DELETE / ARCHIVE HK
+function deleteHkPrompt(uid){
+  var h=hoKhoanList.find(function(x){return x.uid===uid;});if(!h)return;
+  document.getElementById('confirm-title').textContent='🗑️ Chuyển vào thùng rác?';
+  document.getElementById('confirm-msg').textContent='Hố khoan "'+h.name+'" sẽ vào Thùng rác.';
+  document.getElementById('confirm-ok-btn').className='btn btn-rust';
+  document.getElementById('confirm-ok-btn').textContent='🗑️ Chuyển vào thùng rác';
+  confirmAction=function(){
+    var idx=hoKhoanList.findIndex(function(x){return x.uid===uid;});if(idx<0)return;
+    var hx=hoKhoanList.splice(idx,1)[0];hx.deletedAt=new Date().toLocaleDateString('vi-VN');hx.deletedAtISO=new Date().toISOString();hx.type='hk';trashed.push(hx);
+    if(fbReady&&db){db.collection('ptn_hokhoan').doc('hk_'+uid).delete().catch(function(){});db.collection('ptn_deleted').doc('dhk_'+uid).set(hx).catch(function(){});}
+    logActivity('DELETE_HK',hx.name,'→ thùng rác');
+    var card=document.getElementById('hkcard-'+uid);if(card)card.remove();
+    document.getElementById('empty-hk').style.display=hoKhoanList.length?'none':'block';
+    updateStats();updateTrashBadge();
+  };
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+
+function archiveHkPrompt(uid,auto){
+  var h=hoKhoanList.find(function(x){return x.uid===uid;});if(!h)return;
+  document.getElementById('confirm-title').textContent='🗄️ Lưu vào Archive?';
+  document.getElementById('confirm-msg').textContent=auto?'Hố khoan "'+h.name+'" đạt 100%! Chuyển vào lưu trữ?':'Chuyển hố khoan "'+h.name+'" vào lưu trữ?';
+  document.getElementById('confirm-ok-btn').className='btn btn-moss';
+  document.getElementById('confirm-ok-btn').textContent='✓ Xác nhận';
+  confirmAction=function(){
+    var idx=hoKhoanList.findIndex(function(x){return x.uid===uid;});if(idx<0)return;
+    var hx=hoKhoanList.splice(idx,1)[0];hx.archivedAt=new Date().toLocaleDateString('vi-VN');
+    hoKhoanArchived.push(hx);
+    if(fbReady&&db){db.collection('ptn_hokhoan').doc('hk_'+uid).delete().catch(function(){});db.collection('ptn_hokhoan_archived').doc('hka_'+uid).set(hx).catch(function(){});}
+    logActivity('ARCHIVE_HK',hx.name,'');
+    var card=document.getElementById('hkcard-'+uid);if(card)card.remove();
+    document.getElementById('empty-hk').style.display=hoKhoanList.length?'none':'block';
+    updateStats();renderHkArchive();
+  };
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+
+// HK ARCHIVE PANEL
+var archiveHkSel={};
+function renderHkArchive(){
+  var list=document.getElementById('archive-hk-list');var bar=document.getElementById('archive-hk-bulk-bar');
+  if(!list)return;
+  var hkCnt=document.getElementById('atab-hk-cnt');if(hkCnt)hkCnt.textContent=hoKhoanArchived.length;
+  if(!hoKhoanArchived.length){list.innerHTML='<div class="empty-state"><span class="e-icon">🕳️</span><h3>Chưa có hố khoan hoàn thành</h3></div>';if(bar)bar.style.display='none';archiveHkSel={};return;}
+  if(bar)bar.style.display='flex';list.innerHTML='';
+  hoKhoanArchived.forEach(function(h){
+    var sel=!!archiveHkSel[h.uid];var div=document.createElement('div');div.className='archive-item'+(sel?' archive-item-sel':'');
+    div.innerHTML='<label style="display:flex;align-items:center;gap:10px;cursor:pointer;flex:1;" onclick="toggleArchiveHkSel('+h.uid+')"><span style="width:15px;height:15px;border:1.5px solid '+(sel?'var(--rust)':'#c0a870')+';border-radius:var(--r-sm);flex-shrink:0;background:'+(sel?'var(--rust)':'var(--white)')+';display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--white);font-weight:700;">'+(sel?'✓':'')+'</span><div style="flex:1;"><div style="font-weight:700;font-size:.82rem;">'+h.name+(h.project?' · <span style="color:#888;font-weight:400">'+h.project+'</span>':'')+'</div><div style="font-size:.7rem;color:#9a8a6a;margin-top:2px;">'+(h.location||'')+(h.depth?' · ⬇ '+h.depth+'m':'')+'  · Lưu: '+(h.archivedAt||'')+'</div></div></label>'+
+      '<div style="display:flex;align-items:center;gap:5px;flex-shrink:0;"><span class="done-badge">✓ DONE</span><button class="btn btn-ghost btn-sm" onclick="restoreHkFromArchive('+h.uid+')">↩ Phục hồi</button><button class="icon-btn del" onclick="deleteHkArchivedPrompt('+h.uid+')">🗑️</button></div>';
+    list.appendChild(div);
+  });
+  updateArchiveHkSelCount();
+}
+function toggleArchiveHkSel(uid){archiveHkSel[uid]=!archiveHkSel[uid];renderHkArchive();}
+function updateArchiveHkSelCount(){var n=Object.values(archiveHkSel).filter(Boolean).length;var el=document.getElementById('archive-hk-sel-count');if(el)el.textContent=n+' đã chọn';}
+function archiveHkBulkSelAll(val){hoKhoanArchived.forEach(function(h){archiveHkSel[h.uid]=val;});renderHkArchive();}
+function archiveHkBulkRestore(){var uids=Object.keys(archiveHkSel).filter(function(k){return archiveHkSel[k];});if(!uids.length){alert('Chọn ít nhất 1 hố!');return;}uids.forEach(function(uid){restoreHkFromArchive(Number(uid));});archiveHkSel={};renderHkArchive();}
+function archiveHkBulkDeletePrompt(){var uids=Object.keys(archiveHkSel).filter(function(k){return archiveHkSel[k];});if(!uids.length){alert('Chọn ít nhất 1 hố!');return;}document.getElementById('confirm-title').textContent='🗑️ Xóa hố khoan?';document.getElementById('confirm-msg').textContent='Chuyển '+uids.length+' hố khoan vào thùng rác?';document.getElementById('confirm-ok-btn').className='btn btn-rust';document.getElementById('confirm-ok-btn').textContent='🗑️ Xóa '+uids.length+' hố';confirmAction=function(){uids.forEach(function(uid){var idx=hoKhoanArchived.findIndex(function(x){return x.uid==uid;});if(idx<0)return;var hx=hoKhoanArchived.splice(idx,1)[0];hx.deletedAt=new Date().toLocaleDateString('vi-VN');hx.deletedAtISO=new Date().toISOString();hx.type='hk';trashed.push(hx);if(fbReady&&db){db.collection('ptn_hokhoan_archived').doc('hka_'+uid).delete().catch(function(){});db.collection('ptn_deleted').doc('dhk_'+uid).set(hx).catch(function(){});}});archiveHkSel={};renderHkArchive();updateTrashBadge();updateStats();};document.getElementById('confirm-overlay').classList.add('open');}
+function deleteHkArchivedPrompt(uid){archiveHkSel={};archiveHkSel[uid]=true;archiveHkBulkDeletePrompt();}
+function restoreHkFromArchive(uid){var idx=hoKhoanArchived.findIndex(function(x){return x.uid===uid;});if(idx<0)return;var h=hoKhoanArchived.splice(idx,1)[0];delete h.archivedAt;hoKhoanList.push(h);syncHk(h);if(fbReady&&db)db.collection('ptn_hokhoan_archived').doc('hka_'+uid).delete().catch(function(){});renderHkList();renderHkArchive();updateStats();}
+
+// ARCHIVE TAB SWITCH
+var _currentArchiveTab='hk';
+function switchArchiveTab(tab){
+  _currentArchiveTab=tab;
+  document.getElementById('atab-hk').classList.toggle('active',tab==='hk');
+  document.getElementById('atab-sample').classList.toggle('active',tab==='sample');
+  document.getElementById('archive-hk-panel').style.display=tab==='hk'?'block':'none';
+  document.getElementById('archive-sample-panel').style.display=tab==='sample'?'block':'none';
+  if(tab==='hk')renderHkArchive();
+  if(tab==='sample')renderArchive();
+}
+
+// HK IMPORT
+var hkImportData=[];
+function openHkImportModal(){hkImportData=[];document.getElementById('hk-excel-paste').value='';document.getElementById('hk-import-tbody').innerHTML='';document.getElementById('hk-import-table-wrap').style.display='none';document.getElementById('hk-import-summary').innerHTML='';document.getElementById('hk-import-btn').disabled=true;document.getElementById('modal-hk-import').classList.add('open');}
+function closeHkImportModal(){document.getElementById('modal-hk-import').classList.remove('open');}
+function parseAndRenderHkImport(){var raw=document.getElementById('hk-excel-paste').value.trim();if(!raw){hkImportData=[];renderHkImportTable();return;}hkImportData=raw.split('\n').filter(function(l){return l.trim();}).map(function(line){var cols=line.split('\t');return{name:(cols[0]||'').trim(),project:(cols[1]||'').trim(),location:(cols[2]||'').trim(),depth:(cols[3]||'').trim(),note:(cols[4]||'').trim()};}).filter(function(r){return r.name;});renderHkImportTable();}
+function renderHkImportTable(){var tbody=document.getElementById('hk-import-tbody');var wrap=document.getElementById('hk-import-table-wrap');var summEl=document.getElementById('hk-import-summary');tbody.innerHTML='';if(!hkImportData.length){wrap.style.display='none';summEl.innerHTML='';document.getElementById('hk-import-btn').disabled=true;return;}wrap.style.display='block';var validCount=0,dupCount=0;var existing=hoKhoanList.concat(hoKhoanArchived);var seen={};hkImportData.forEach(function(row,i){var dup=existing.some(function(e){return e.name===row.name;})||seen[row.name];if(dup)dupCount++;else validCount++;seen[row.name]=true;var tr=document.createElement('tr');tr.className=dup?'row-dup':'row-ok';tr.innerHTML='<td style="padding:4px 8px;color:#b0a080;font-size:.68rem;">'+(i+1)+'</td><td><input class="itd-input" value="'+escHtml(row.name)+'" oninput="hkImportData['+i+'].name=this.value.trim();renderHkImportTable();"/></td><td><input class="itd-input" value="'+escHtml(row.project)+'" oninput="hkImportData['+i+'].project=this.value.trim();"/></td><td><input class="itd-input" value="'+escHtml(row.location)+'" oninput="hkImportData['+i+'].location=this.value.trim();"/></td><td><input class="itd-input" value="'+escHtml(row.depth)+'" oninput="hkImportData['+i+'].depth=this.value.trim();"/></td><td><input class="itd-input" value="'+escHtml(row.note)+'" oninput="hkImportData['+i+'].note=this.value.trim();"/></td><td class="td-status">'+(dup?'<span class="row-badge dup">⊘ Trùng</span>':'<span class="row-badge ok">✓ OK</span>')+'</td>';tbody.appendChild(tr);});summEl.innerHTML='<span class="imp-chip green">✓ '+validCount+' hố sẽ import</span>'+(dupCount?'<span class="imp-chip" style="background:#fffbee;color:#8a5a10;border-color:#c0a050;">⊘ '+dupCount+' trùng</span>':'');document.getElementById('hk-import-btn').disabled=validCount===0;}
+function addHkImportRow(){hkImportData.push({name:'',project:'',location:'',depth:'',note:''});renderHkImportTable();}
+function doHkImport(){if(!requireAuth())return;var existing=hoKhoanList.concat(hoKhoanArchived);var seen={};var toAdd=hkImportData.filter(function(r){if(!r.name)return false;if(existing.some(function(e){return e.name===r.name;}))return false;if(seen[r.name])return false;seen[r.name]=true;return true;});toAdd.forEach(function(r){var nh={uid:Date.now()+(Math.random()*999|0),name:r.name,project:r.project||'',location:r.location||'',depth:r.depth||'',note:r.note||'',steps:{},open:false,createdAt:new Date().toLocaleDateString('vi-VN'),createdBy:currentUser?(currentUser.displayName||currentUser.email):'Khách'};hoKhoanList.push(nh);syncHk(nh);});logActivity('IMPORT_HK','',toAdd.length+' hố');renderHkList();updateStats();closeHkImportModal();alert('✅ Đã import '+toAdd.length+' hố khoan thành công!');}
+
+// HK BULK MODAL
+var hkBulkSel={},hkBulkStepSel={};
+function openHkBulkModal(){hkBulkSel={};hkBulkStepSel={};renderHkBulkList();renderHkBulkSteps();updateHkBkCounts();document.getElementById('modal-hk-bulk').classList.add('open');}
+function closeHkBulkModal(){document.getElementById('modal-hk-bulk').classList.remove('open');}
+function renderHkBulkList(){var el=document.getElementById('hkbulk-hk-list');el.innerHTML='';if(!hoKhoanList.length){el.innerHTML='<div style="color:#c8b890;padding:18px;text-align:center;font-size:.78rem;">Chưa có hố khoan</div>';return;}hoKhoanList.forEach(function(h){var sel=!!hkBulkSel[h.uid];var div=document.createElement('div');div.className='sample-sel'+(sel?' sel':'');div.innerHTML='<span class="sck">'+(sel?'✓':'')+'</span><div style="flex:1;"><b>'+h.name+'</b><br><span style="font-size:.66rem;color:#b0a080;">'+calcHkPct(h)+'%</span></div>';div.onclick=function(){hkBulkSel[h.uid]=!hkBulkSel[h.uid];div.classList.toggle('sel',hkBulkSel[h.uid]);div.querySelector('.sck').textContent=hkBulkSel[h.uid]?'✓':'';updateHkBkCounts();};el.appendChild(div);});}
+function renderHkBulkSteps(){var el=document.getElementById('hkbulk-steps');el.innerHTML='';HK_STEPS.forEach(function(step){var sel=!!hkBulkStepSel[step.id];var div=document.createElement('div');div.className='bulk-step'+(sel?' sel':'');div.innerHTML='<span class="bchk">'+(sel?'✓':'')+'</span><span>'+step.l+'</span>';div.onclick=function(){hkBulkStepSel[step.id]=!hkBulkStepSel[step.id];div.classList.toggle('sel',hkBulkStepSel[step.id]);div.querySelector('.bchk').textContent=hkBulkStepSel[step.id]?'✓':'';updateHkBkCounts();};el.appendChild(div);});}
+function hkBulkSelAll(val){hoKhoanList.forEach(function(h){hkBulkSel[h.uid]=val;});renderHkBulkList();updateHkBkCounts();}
+function hkBulkStepSelAll(val){HK_STEP_IDS.forEach(function(id){hkBulkStepSel[id]=val;});renderHkBulkSteps();updateHkBkCounts();}
+function updateHkBkCounts(){var sc=hoKhoanList.filter(function(h){return hkBulkSel[h.uid];}).length;var stc=HK_STEP_IDS.filter(function(id){return hkBulkStepSel[id];}).length;document.getElementById('hkb-sc').textContent=sc+' hố';document.getElementById('hkb-stc').textContent=stc+' bước';var prev=document.getElementById('hkb-preview');if(!sc){prev.textContent='Chọn hố khoan để thao tác';}else if(stc){prev.textContent='→ '+stc+' bước × '+sc+' hố';prev.style.color='var(--moss)';}else{prev.textContent=sc+' hố đã chọn';prev.style.color='var(--sky)';}}
+function applyHkBulk(){if(!requireAuth())return;var selH=hoKhoanList.filter(function(h){return hkBulkSel[h.uid];});var selSt=HK_STEP_IDS.filter(function(id){return hkBulkStepSel[id];});if(!selH.length||!selSt.length){alert('Chọn ít nhất 1 hố và 1 bước!');return;}selH.forEach(function(h){selSt.forEach(function(id){h.steps[id]=true;});syncHk(h);refreshHkCard(h);});logActivity('BULK_TICK_HK','',selH.length+'hố/'+selSt.length+'bước');renderHkBulkList();updateHkBkCounts();selH.forEach(function(h){if(calcHkPct(h)===100)setTimeout(function(){closeHkBulkModal();archiveHkPrompt(h.uid,true);},800);});alert('✅ Đã tick '+selSt.length+' bước cho '+selH.length+' hố khoan!');}
+function applyHkBulkUntick(){if(!requireAuth())return;var selH=hoKhoanList.filter(function(h){return hkBulkSel[h.uid];});var selSt=HK_STEP_IDS.filter(function(id){return hkBulkStepSel[id];});if(!selH.length||!selSt.length){alert('Chọn ít nhất 1 hố và 1 bước!');return;}selH.forEach(function(h){selSt.forEach(function(id){h.steps[id]=false;});syncHk(h);refreshHkCard(h);});alert('✅ Đã bỏ tick '+selSt.length+' bước cho '+selH.length+' hố khoan!');}
+function hkBulkArchive(){var selH=hoKhoanList.filter(function(h){return hkBulkSel[h.uid];});if(!selH.length){alert('Chọn ít nhất 1 hố!');return;}document.getElementById('confirm-title').textContent='🗄️ Lưu trữ hàng loạt?';document.getElementById('confirm-msg').textContent='Chuyển '+selH.length+' hố khoan vào lưu trữ?';document.getElementById('confirm-ok-btn').className='btn btn-moss';document.getElementById('confirm-ok-btn').textContent='🗄️ Xác nhận';confirmAction=function(){selH.forEach(function(h){archiveHkPrompt(h.uid,false);});closeHkBulkModal();};document.getElementById('confirm-overlay').classList.add('open');}
+function hkBulkDelete(){var selH=hoKhoanList.filter(function(h){return hkBulkSel[h.uid];});if(!selH.length){alert('Chọn ít nhất 1 hố!');return;}document.getElementById('confirm-title').textContent='🗑️ Xóa hàng loạt?';document.getElementById('confirm-msg').textContent='Chuyển '+selH.length+' hố vào thùng rác?';document.getElementById('confirm-ok-btn').className='btn btn-rust';document.getElementById('confirm-ok-btn').textContent='🗑️ Xóa '+selH.length+' hố';confirmAction=function(){selH.forEach(function(h){deleteHkPrompt(h.uid);});hkBulkSel={};closeHkBulkModal();};document.getElementById('confirm-overlay').classList.add('open');}
 </script>
 </body>
 </html>

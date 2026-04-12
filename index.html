@@ -2241,22 +2241,13 @@ function submitPsOrder() {
     };
 
     fetch(APPS_SCRIPT, {
-    method: 'POST',
-    // Quan trọng: Để 'text/plain' để tránh lỗi CORS Preflight của GAS
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' }, 
-    body: JSON.stringify(payload) 
-})
-.then(res => res.text()) // Nhận dạng text trước để xem GAS báo lỗi gì
-.then(text => {
-    try {
-        const data = JSON.parse(text);
-        console.log("Kết quả từ GAS:", data);
-        if(data.status === "success") alert("Đã gửi yêu cầu thành công!");
-    } catch(e) {
-        console.log("GAS phản hồi không phải JSON:", text);
-    }
-})
-.catch(err => console.warn("Lỗi fetch:", err));
+        method: 'POST',
+        body: JSON.stringify(payload) // Gửi dạng JSON để khớp với JSON.parse trong Apps Script
+    })
+    .then(res => res.json())
+    .then(data => console.log("Email notify status:", data))
+    .catch(err => console.warn("Email notify failed", err));
+}
 
 function confirmPsPayment() {
     alert("Cảm ơn bạn! Yêu cầu chỉnh sửa đã được ghi nhận. Chúng tôi sẽ xử lý và phản hồi qua Drive/Zalo sớm nhất.");

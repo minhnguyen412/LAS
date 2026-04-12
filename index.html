@@ -1591,7 +1591,7 @@ header{
   </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+< src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
@@ -2229,9 +2229,24 @@ function submitPsOrder() {
     document.getElementById('qr-code-img').src = qrUrl;
     document.getElementById('qr-price').textContent = "Số tiền: " + total.toLocaleString('vi-VN') + "đ";
     document.getElementById('modal-payment').classList.add('open');
+// GỬI DỮ LIỆU SANG APPS SCRIPT ĐỂ GỬI EMAIL THÔNG BÁO
+    var payload = {
+        action: "PHOTOSHOP_REQUEST", // Biến để Apps Script nhận diện gửi email
+        details: {
+            user: who,
+            quantity: qty,
+            note: note,
+            total: total
+        }
+    };
 
-
-    
+    fetch(APPS_SCRIPT, {
+        method: 'POST',
+        body: JSON.stringify(payload) // Gửi dạng JSON để khớp với JSON.parse trong Apps Script
+    })
+    .then(res => res.json())
+    .then(data => console.log("Email notify status:", data))
+    .catch(err => console.warn("Email notify failed", err));
 }
 function confirmPsPayment() {
     alert("Cảm ơn bạn! Yêu cầu chỉnh sửa đã được ghi nhận. Chúng tôi sẽ xử lý và phản hồi qua Drive/Zalo sớm nhất.");

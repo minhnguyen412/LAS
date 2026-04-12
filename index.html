@@ -1529,18 +1529,18 @@ header{
 </div>
 
 <!-- IMPORT MODAL BH-->
-<div class="modal-overlay" id="modal-bh-import" onclick="if(event.target===this)closeImportModal()">
+<div class="modal-overlay" id="modal-bh-import" onclick="if(event.target===this)closeBhImportModal()">
   <div class="modal modal-xl">
     <div class="modal-title">📋 Import từ Excel</div>
-    <div class="form-group"><label class="form-label">Dán dữ liệu từ Excel</label><textarea id="excel-paste" rows="4" style="width:100%;padding:7px 10px;background:var(--earth-bg);border:var(--border-md);border-radius:var(--r-sm);font-family:var(--font-ui);font-size:.78rem;resize:vertical;outline:none;" placeholder="Ctrl+V để dán từ Excel vào đây..." oninput="parseAndRenderImport()"></textarea></div>
-    <div id="import-summary" class="import-summary"></div>
-    <div class="import-table-wrap" id="import-table-wrap" style="display:none;">
-      <table class="import-table"><thead><tr><th style="width:28px;">#</th><th>Số hiệu</th><th>Hố khoan</th><th>Ký hiệu</th><th>Độ sâu</th><th>Tên biểu</th><th>Mô tả</th><th>Loại TN</th><th style="width:60px;">TT</th></tr></thead><tbody id="import-tbody"></tbody></table>
+    <div class="form-group"><label class="form-label">Dán dữ liệu từ Excel</label><textarea id="bh-excel-paste" rows="4" style="width:100%;padding:7px 10px;background:var(--earth-bg);border:var(--border-md);border-radius:var(--r-sm);font-family:var(--font-ui);font-size:.78rem;resize:vertical;outline:none;" placeholder="Ctrl+V để dán từ Excel vào đây..." oninput="parseAndRenderBhImport()"></textarea></div>
+    <div id="bh-import-summary" class="import-summary"></div>
+    <div class="import-table-wrap" id="bh-import-table-wrap" style="display:none;">
+      <table class="import-table"><thead><tr><th style="width:28px;">#</th><th>Số hiệu</th><th>Hố khoan</th><th>Mô tả</th></tr></thead><tbody id="bh-import-tbody"></tbody></table>
     </div>
     <div style="display:flex;gap:7px;justify-content:flex-end;margin-top:12px;padding-top:12px;border-top:var(--border);">
       <button class="btn btn-ghost btn-sm" onclick="addImportRow()">+ Thêm dòng</button>
-      <button class="btn btn-ghost" onclick="closeImportModal()">Hủy</button>
-      <button class="btn btn-sky" id="import-btn" onclick="doImport()" disabled>⬇ Import mẫu hợp lệ</button>
+      <button class="btn btn-ghost" onclick="closeBhImportModal()">Hủy</button>
+      <button class="btn btn-sky" id="import-btn" onclick="doBhImport()" disabled>⬇ Import mẫu hợp lệ</button>
     </div>
   </div>
 </div>
@@ -1572,11 +1572,11 @@ header{
     </div>
     <div class="bulk-action-bar">
       <span class="bar-label" id="bh-b-preview">Chọn Hố Khoan để thao tác</span>
-      <button class="btn btn-moss btn-sm" onclick="applyBulk()">✓ Tick</button>
-      <button class="btn btn-ghost btn-sm" onclick="applyBulkUntick()" style="border-color:var(--rust);color:var(--rust);">✕ Bỏ tick</button>
-      <button class="btn btn-sky btn-sm" onclick="bulkArchive()">🗄️ Lưu trữ</button>
-      <button class="btn btn-rust btn-sm" onclick="bulkDelete()">🗑️ Xóa</button>
-      <button class="btn btn-ghost btn-sm" onclick="closeBulkModal()">Đóng</button>
+      <button class="btn btn-moss btn-sm" onclick="applyBhBulk()">✓ Tick</button>
+      <button class="btn btn-ghost btn-sm" onclick="applyBhBulkUntick()" style="border-color:var(--rust);color:var(--rust);">✕ Bỏ tick</button>
+      <button class="btn btn-sky btn-sm" onclick="bulkArchiveBh()">🗄️ Lưu trữ</button>
+      <button class="btn btn-rust btn-sm" onclick="bulkDeleteBh()">🗑️ Xóa</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeBhBulkModal()">Đóng</button>
     </div>
   </div>
 </div>

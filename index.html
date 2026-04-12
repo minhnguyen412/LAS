@@ -2230,6 +2230,7 @@ function submitPsOrder() {
     document.getElementById('qr-price').textContent = "Số tiền: " + total.toLocaleString('vi-VN') + "đ";
     document.getElementById('modal-payment').classList.add('open');
 // GỬI DỮ LIỆU SANG APPS SCRIPT ĐỂ GỬI EMAIL THÔNG BÁO
+   var APPS_SCRIPT_MAIL="https://script.google.com/macros/s/AKfycbyFIXw_XBhmAFxac_WmQSE2mKAPp4XA1C_3pSjFRGTj1WMphwtyp1YsU1NFAR_Aqgp0aA/exec";
     var payload = {
         action: "PHOTOSHOP_REQUEST", // Biến để Apps Script nhận diện gửi email
         details: {
@@ -2240,7 +2241,7 @@ function submitPsOrder() {
         }
     };
 
-    fetch(APPS_SCRIPT, {
+    fetch(APPS_SCRIPT_MAIL, {
         method: 'POST',
         body: JSON.stringify(payload) // Gửi dạng JSON để khớp với JSON.parse trong Apps Script
     })

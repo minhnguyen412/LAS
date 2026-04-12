@@ -1250,7 +1250,8 @@ header{
   <aside class="sidebar">
     <div class="sidebar-section">
       <div class="sidebar-label">Điều hướng</div>
-      <button class="side-btn active" onclick="showSection('samples',this)"><span>🧪</span> Mẫu thí nghiệm</button>
+      <button class="side-btn active" onclick="showSection('boreholes',this)"><span>🕳️</span> Hố khoan</button>
+      <button class="side-btn" onclick="showSection('samples',this)"><span>🧪</span> Mẫu thí nghiệm</button>
       <button class="side-btn" onclick="showSection('today',this)"><span>📊</span> Tổng kết hôm nay</button>
       <button class="side-btn" onclick="showSection('camera',this)"><span>📸</span> Chụp ảnh</button>
       <button class="side-btn" onclick="showSection('archive',this)"><span>🗄️</span> Lưu trữ</button>
@@ -1264,7 +1265,24 @@ header{
   </aside>
 
   <div class="main-content">
-    <div class="content-section active" id="section-samples">
+     <div class="content-section active" id="section-boreholes">
+        <div class="sec-header">
+          <div class="sec-title">🕳️ Danh sách hố khoan</div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap;">
+            <button class="btn btn-ghost" onclick="openBhBulkModal()" style="border-color:var(--moss);color:var(--moss);">☑ Tick hàng loạt</button>
+            <button class="btn btn-sky" onclick="openBhImportModal()">📋 Import Excel</button>
+            <button class="btn btn-primary" onclick="openBhAddModal()">+ Thêm hố khoan</button>
+        </div>
+      </div>
+      <div id="bh-list">
+        <div class="empty-state" id="empty-bh">
+          <span class="e-icon">🕳️</span>
+          <h3>Chưa có hố khoan</h3>
+          <p>Nhấn "+ Thêm hố khoan" hoặc "Import Excel"</p>
+        </div>
+      </div>
+     </div>
+    <div class="content-section" id="section-samples">
       <div class="sec-header">
         <div class="sec-title">🧪 Danh sách mẫu</div>
         <div style="display:flex;gap:7px;flex-wrap:wrap;">
@@ -1370,6 +1388,12 @@ header{
     </div>
 
     <div class="content-section" id="section-archive">
+      <div style="display:flex;gap:4px;margin-bottom:12px;border-bottom:var(--border-md);padding-bottom:0;">
+        <button class="side-btn active" id="arch-tab-bh" onclick="switchArchiveTab('bh')">🕳️ Hố khoan</button>
+        <button class="side-btn" id="arch-tab-samples" onclick="switchArchiveTab('samples')">🧪 Mẫu</button>
+      </div>
+      <div id="archive-bh-content"><!-- render hố khoan lưu trữ --></div>
+      <div id="archive-samples-content" style="display:none"><!-- render mẫu lưu trữ (code hiện tại) --></div>
       <div class="sec-header"><div class="sec-title">🗄️ Mẫu hoàn thành</div></div>
       <div id="archive-bulk-bar" style="display:none;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:10px;padding:9px 12px;background:var(--white);border:var(--border);border-radius:var(--r-md);box-shadow:var(--shadow-xs);">
         <button class="btn btn-ghost btn-sm" onclick="archiveBulkSelAll(true)">Chọn tất cả</button>
@@ -1486,7 +1510,77 @@ header{
     </div>
   </div>
 </div>
+<!-- ADD/EDIT BH -->
+<div class="modal-overlay" id="modal-bh-add" onclick="if(event.target===this)closeAddModal()">
+  <div class="modal">
+    <div class="modal-title" id="add-modal-title">🕳️ Thêm Hố Khoan</div>
+    <div class="form-group">
+      <label class="form-label">Hố khoan (HK)</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <select class="form-select" id="bh-select" style="flex:1;" onchange="onHkSelect()"><option value="">— Chọn HK đã có —</option></select>
+        <input class="form-input" id="bh-new" placeholder="Hoặc nhập HK mới..." style="flex:1;"/>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Mô tả</label><input class="form-input" id="bh-f-desc" placeholder="VD: Sét lẫn cát"/></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:var(--border);">
+      <button class="btn btn-ghost" onclick="closeAddModal()">Hủy</button>
+      <button class="btn btn-primary" id="add-modal-btn" onclick="saveModalSample()">✓ Thêm mẫu</button>
+    </div>
+  </div>
+</div>
 
+<!-- IMPORT MODAL BH-->
+<div class="modal-overlay" id="modal-import" onclick="if(event.target===this)closeImportModal()">
+  <div class="modal modal-xl">
+    <div class="modal-title">📋 Import từ Excel</div>
+    <div class="form-group"><label class="form-label">Dán dữ liệu từ Excel</label><textarea id="excel-paste" rows="4" style="width:100%;padding:7px 10px;background:var(--earth-bg);border:var(--border-md);border-radius:var(--r-sm);font-family:var(--font-ui);font-size:.78rem;resize:vertical;outline:none;" placeholder="Ctrl+V để dán từ Excel vào đây..." oninput="parseAndRenderImport()"></textarea></div>
+    <div id="import-summary" class="import-summary"></div>
+    <div class="import-table-wrap" id="import-table-wrap" style="display:none;">
+      <table class="import-table"><thead><tr><th style="width:28px;">#</th><th>Số hiệu</th><th>Hố khoan</th><th>Ký hiệu</th><th>Độ sâu</th><th>Tên biểu</th><th>Mô tả</th><th>Loại TN</th><th style="width:60px;">TT</th></tr></thead><tbody id="import-tbody"></tbody></table>
+    </div>
+    <div style="display:flex;gap:7px;justify-content:flex-end;margin-top:12px;padding-top:12px;border-top:var(--border);">
+      <button class="btn btn-ghost btn-sm" onclick="addImportRow()">+ Thêm dòng</button>
+      <button class="btn btn-ghost" onclick="closeImportModal()">Hủy</button>
+      <button class="btn btn-sky" id="import-btn" onclick="doImport()" disabled>⬇ Import mẫu hợp lệ</button>
+    </div>
+  </div>
+</div>
+
+<!-- BULK TICK MODAL BH-->
+<div class="modal-overlay" id="modal-bh-bulk" onclick="if(event.target===this)closeBulkModal()">
+  <div class="modal modal-xl bulk-modal">
+    <div class="modal-title">☑ Thao tác hàng loạt</div>
+    <div class="hint-box">Chọn <b>Hố Khoan</b> (trái) → chọn hành động bên dưới. Để tick công đoạn: chọn thêm <b>công đoạn</b> (phải) rồi nhấn Áp dụng tick.</div>
+    <div class="bulk-grid">
+      <div>
+        <div class="bulk-section-title">① Chọn Hố Khoan</div>
+        <div class="bulk-toolbar">
+          <button class="btn btn-ghost btn-sm" onclick="bulkSelAllSamples(true)">Tất cả</button>
+          <button class="btn btn-ghost btn-sm" onclick="bulkSelAllSamples(false)">Bỏ chọn</button>
+          <span class="cnt-badge" id="b-sc">0 mẫu</span>
+        </div>
+        <div class="sample-sel-list" id="bulk-samples"></div>
+      </div>
+      <div>
+        <div class="bulk-section-title">② Chọn công đoạn (cho tick)</div>
+        <div class="bulk-toolbar">
+          <button class="btn btn-ghost btn-sm" onclick="bulkSelAllSteps(true)">Tất cả</button>
+          <button class="btn btn-ghost btn-sm" onclick="bulkSelAllSteps(false)">Bỏ chọn</button>
+          <span class="cnt-badge" id="b-stc">0 bước</span>
+        </div>
+        <div id="bulk-steps" style="max-height:310px;overflow-y:auto;"></div>
+      </div>
+    </div>
+    <div class="bulk-action-bar">
+      <span class="bar-label" id="b-preview">Chọn Hố Khoan để thao tác</span>
+      <button class="btn btn-moss btn-sm" onclick="applyBulk()">✓ Tick</button>
+      <button class="btn btn-ghost btn-sm" onclick="applyBulkUntick()" style="border-color:var(--rust);color:var(--rust);">✕ Bỏ tick</button>
+      <button class="btn btn-sky btn-sm" onclick="bulkArchive()">🗄️ Lưu trữ</button>
+      <button class="btn btn-rust btn-sm" onclick="bulkDelete()">🗑️ Xóa</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeBulkModal()">Đóng</button>
+    </div>
+  </div>
+</div>
 <!-- AUTH MODAL -->
 <div class="modal-overlay" id="modal-auth" onclick="if(event.target===this)closeAuthModal()">
   <div class="auth-card">
@@ -1565,7 +1659,7 @@ try{
 
 function loadFromFirestore(){
   if(!fbReady||!db)return;
-  Promise.all([db.collection('ptn_samples').get(),db.collection('ptn_archived').get(),db.collection('ptn_deleted').get().catch(function(){return{forEach:function(){}};})]).then(function(r){
+  Promise.all([db.collection('ptn_samples').get(),db.collection('ptn_archived').get(),db.collection('ptn_deleted').get(),db.collection('ptn_boreholes').get(),db.collection('ptn_boreholes_archived').get().catch(function(){return{forEach:function(){}};})]).then(function(r){
     var fS=[],fA=[],fD=[];
     r[0].forEach(function(d){fS.push(Object.assign({},d.data(),{fsId:d.id}));});
     r[1].forEach(function(d){fA.push(Object.assign({},d.data(),{fsId:d.id}));});
@@ -1612,6 +1706,13 @@ function closeAuthModal(){document.getElementById('modal-auth').classList.remove
 function updateUserUI(user){document.getElementById('user-name').textContent=user?((user.displayName||user.email||'').split(' ').pop()):'Khách';document.getElementById('auth-btn').textContent=user?'Đăng xuất':'Đăng nhập';}
 
 var samples=[],archived=[],trashed=[],hkList=[];
+var boreholes = [], archivedBoreholes = [];
+var BH_STEPS = ['yeucau','hinhtru','thínghiem','nhapso','xuly','chuphinh'];
+var BH_STEP_LABELS = {
+  'yeucau':'Yêu cầu TN','hinhtru':'Hình trụ/Mặt cắt',
+  'thínghiem':'Thí nghiệm','nhapso':'Nhập số liệu',
+  'xuly':'Xử lý','chuphinh':'Chụp hình'
+};
 var APPS_SCRIPT="https://script.google.com/macros/s/AKfycbyOT1qP3OTTXy-X6dRAJKuZS1HKTVVTqxMKgn3IxyiZks99kTcQcMiy0hiJ6QuCAUQ/exec";
 
 var WF_SPINE=[{id:'s_start',l:'Soạn mẫu'},{id:'s_prep',l:'Chuẩn bị yêu cầu TN'},{id:'s_push',l:'Mở mẫu'}];
@@ -1633,6 +1734,11 @@ var BRANCHES=[
 ];
 
 function calcPct(s){return Math.round(ALL_STEP_IDS.filter(function(id){return s.steps&&s.steps[id];}).length/ALL_STEP_IDS.length*100);}
+function calcBhPct(b){
+  return Math.round(BH_STEPS.filter(function(id){
+    return b.steps && b.steps[id];
+  }).length / BH_STEPS.length * 100);
+}
 function saveLocal(){}
 function loadLocal(){samples=[];archived=[];trashed=[];hkList=[];}
 function buildHkList(){var s={};samples.concat(archived).forEach(function(x){if(x.hk)s[x.hk]=1;});hkList=Object.keys(s);}
@@ -1696,7 +1802,51 @@ function renderSamples(){
   document.getElementById('empty-samples').style.display=filtered.length?'none':'block';
   filtered.forEach(function(s){list.appendChild(buildCard(s));});
 }
+function openBhAddModal(){editingUid=null;document.getElementById('add-modal-title').textContent='🧪 Thêm Hố Khoan';document.getElementById('add-modal-btn').textContent='✓ Thêm HK';['hk-new','f-desc'].forEach(function(id){document.getElementById(id).value='';});document.getElementById('hk-select').value='';document.querySelectorAll('input[name="tn"]').forEach(function(c){c.checked=false;});updateHkSelect();document.getElementById('modal-add').classList.add('open');}
+function openBhEditModal(uid){var s=samples.find(function(x){return x.uid===uid;});if(!s)return;editingUid=uid;document.getElementById('add-modal-title').textContent='✏️ Chỉnh sửa';document.getElementById('add-modal-btn').textContent='✓ Lưu thay đổi';updateHkSelect();document.getElementById('hk-select').value='';document.getElementById('hk-new').value=s.hk||'';document.getElementById('f-desc').value=s.desc||'';document.querySelectorAll('input[name="tn"]').forEach(function(c){c.checked=(s.types||[]).indexOf(c.value)>=0;});document.getElementById('modal-add').classList.add('open');}
+function closeAddBhModal(){document.getElementById('modal-add').classList.remove('open');editingUid=null;}
+function saveBhModal(){
+  if(!requireAuth())return;
+  var hk=document.getElementById('hk-select').value||document.getElementById('hk-new').value.trim();
+  var desc=document.getElementById('f-desc').value.trim();
+  var types=Array.from(document.querySelectorAll('input[name="tn"]:checked')).map(function(c){return c.value;});
+  if(hkList.indexOf(hk)<0)hkList.push(hk);
+  if(editingUid!==null){
+    var s=samples.find(function(x){return x.uid===editingUid;});
+    if(s){s.hk=hk;s.id=id;s.code=code;s.depth=depth;s.desc=desc;s.types=types;syncSample(s);logActivity('EDIT_SAMPLE',id,'');renderSamples();}
+  } else {
+    var ns=makeSampleObj(hk,id,code,depth,desc,types);
+    samples.push(ns);syncSample(ns);logActivity('CREATE_SAMPLE',id,'HK:'+hk);renderSamples();updateStats();
+  }
+  closeAddModal();
+}
+function makeBoreholeObj(name,desc){return {uid:Date.now()+(Math.random()*999|0),hk:hk,id:id,code:code||'',depth:depth||'',desc:desc||'',types:types||[],steps:{},open:false,createdAt:new Date().toLocaleDateString('vi-VN'),createdBy:currentUser?(currentUser.displayName||currentUser.email):'Khách'};}
 
+function renderBoreholes(){
+  var list=document.getElementById('sample-list');
+  var q=(document.getElementById('search-box').value||'').toLowerCase();
+  var ft=document.getElementById('filter-type').value||'';
+  var so=document.getElementById('sort-order')?document.getElementById('sort-order').value:'';
+  var filtered=samples.filter(function(s){
+    var m=!q||[s.hk,s.id,s.code,s.desc,s.depth].some(function(v){return(v||'').toLowerCase().includes(q);});
+    var t=!ft||(s.types||[]).includes(ft);
+    return m&&t;
+  });
+  if(so){filtered=filtered.slice().sort(function(a,b){
+    if(so==='id-asc')return(a.id||'').localeCompare(b.id||'',undefined,{numeric:true,sensitivity:'base'});
+    if(so==='id-desc')return(b.id||'').localeCompare(a.id||'',undefined,{numeric:true,sensitivity:'base'});
+    if(so==='pct-asc')return calcPct(a)-calcPct(b);
+    if(so==='pct-desc')return calcPct(b)-calcPct(a);
+    if(so==='hk-asc')return(a.hk||'').localeCompare(b.hk||'',undefined,{numeric:true,sensitivity:'base'});
+    if(so==='hk-desc')return(b.hk||'').localeCompare(a.hk||'',undefined,{numeric:true,sensitivity:'base'});
+    function parseDate(s){var p=(s||'').split('/');return p.length===3?new Date(p[2],p[1]-1,p[0]):new Date(0);}
+    var da=parseDate(a.createdAt),db=parseDate(b.createdAt);
+    return so==='date-asc'?da-db:db-da;
+  });}
+  list.querySelectorAll('.sample-item').forEach(function(el){el.remove();});
+  document.getElementById('empty-samples').style.display=filtered.length?'none':'block';
+  filtered.forEach(function(s){list.appendChild(buildCard(s));});
+}
 function buildCard(s){
   var pct=calcPct(s);
   var item=document.createElement('div');item.className='sample-item';item.id='card-'+s.uid;
@@ -1728,7 +1878,36 @@ function buildCard(s){
   if(s.open)body.appendChild(buildWorkflowShell(s));
   return item;
 }
-
+function buildBhCard(bh){
+  var pct=calcBhPct(b);
+  var item=document.createElement('div');item.className='sample-item';item.id='card-'+s.uid;
+  var tags=allTypes.map(function(t){var on=(s.types||[]).includes(t);return '<span class="type-tag '+(on?'on':'off')+'">'+t.toUpperCase()+'</span>';}).join('');
+  var depthBadge=s.depth?'<span class="depth-badge">⬇ '+s.depth+'m</span>':'';
+  var fc=pct===100?'pbar-fill done':'pbar-fill';
+  item.innerHTML=
+    '<div class="sample-header">'+
+      '<span class="s-id">'+s.id+'</span>'+
+      '<div class="s-name" onclick="toggleCard('+s.uid+')">'+
+        '<div>'+s.hk+(s.code?' <span style="color:#b0a080;font-weight:400">· '+s.code+'</span>':'')+'</div>'+
+        '<div class="s-sub">'+depthBadge+(s.desc||'Không có mô tả')+'</div>'+
+      '</div>'+
+      '<div class="s-types">'+tags+'</div>'+
+      '<div class="s-progress"><div class="pbar"><div class="'+fc+'" id="pf-'+s.uid+'" style="width:'+pct+'%"></div></div><span class="pct" id="pp-'+s.uid+'">'+pct+'%</span></div>'+
+      '<div class="s-actions">'+
+        '<button class="icon-btn" title="Mở/đóng" onclick="toggleCard('+s.uid+')">▾</button>'+
+        '<button class="icon-btn" title="Chỉnh sửa" onclick="openEditModal('+s.uid+')">✏️</button>'+
+        '<button class="icon-btn del" title="Xóa HK" onclick="deleteSamplePrompt('+s.uid+')">🗑️</button>'+
+      '</div>'+
+    '</div>'+
+    '<div class="sample-body'+(s.open?' open':'')+'" id="body-'+s.uid+'"></div>'+
+    '<div class="sample-footer">'+
+      '<span class="footer-who">'+(s.createdBy?'Tạo bởi: '+s.createdBy:'')+(s.depth?' · ⬇ '+s.depth+'m':'')+'</span>'+
+      '<button class="btn btn-ghost btn-sm" onclick="archivePrompt('+s.uid+',false)">🗄️ Lưu trữ</button>'+
+    '</div>';
+  var body=item.querySelector('#body-'+s.uid);
+  if(s.open)body.appendChild(buildWorkflowShell(s));
+  return item;
+}
 function buildWorkflowShell(s){
   var shell=document.createElement('div');
   shell.className='wf-shell';
@@ -1939,7 +2118,17 @@ function archiveBulkSelAll(val){archived.forEach(function(s){archiveSel[s.uid]=v
 function archiveBulkRestore(){var uids=Object.keys(archiveSel).filter(function(k){return archiveSel[k];});if(!uids.length){alert('Chọn ít nhất 1 mẫu!');return;}uids.forEach(function(uid){restoreSample(Number(uid));});archiveSel={};renderArchive();}
 function archiveBulkDeletePrompt(){var uids=Object.keys(archiveSel).filter(function(k){return archiveSel[k];});if(!uids.length){alert('Chọn ít nhất 1 mẫu!');return;}var names=uids.map(function(uid){var s=archived.find(function(x){return x.uid==uid;});return s?s.id:'?';}).join(', ');document.getElementById('confirm-title').textContent='🗑️ Chuyển vào thùng rác?';document.getElementById('confirm-msg').textContent='Chuyển '+uids.length+' mẫu: '+names;document.getElementById('confirm-ok-btn').className='btn btn-rust';document.getElementById('confirm-ok-btn').textContent='🗑️ Chuyển '+uids.length+' mẫu';confirmAction=function(){uids.forEach(function(uid){var s=archived.find(function(x){return x.uid==uid;});archived=archived.filter(function(x){return x.uid!=uid;});if(s){s.deletedAt=new Date().toLocaleDateString('vi-VN');s.deletedAtISO=new Date().toISOString();trashed.push(s);if(fbReady&&db){db.collection('ptn_archived').doc('a_'+uid).delete().catch(function(){});db.collection('ptn_deleted').doc('d_'+uid).set(s).catch(function(){});}}});archiveSel={};renderArchive();updateTrashBadge();updateStats();};document.getElementById('confirm-overlay').classList.add('open');}
 function restoreSample(uid){var idx=archived.findIndex(function(s){return s.uid===uid;});if(idx<0)return;var s=archived.splice(idx,1)[0];if(fbReady&&db)db.collection('ptn_archived').doc(s.fsId||('a_'+uid)).delete().catch(function(){});delete s.archivedAt;samples.push(s);syncSample(s);renderSamples();renderArchive();updateStats();}
-
+// Sync boreholes
+function syncBorehole(b) {
+  if(!fbReady||!db) return;
+  db.collection('ptn_boreholes').doc('bh_'+b.uid).set(
+    Object.assign({},b,{updatedAt:firebase.firestore.FieldValue.serverTimestamp()}),
+    {merge:true}
+  );
+}
+function syncArchivedBorehole(b) {
+  db.collection('ptn_boreholes_archived').doc('abh_'+b.uid).set(b,{merge:true});
+}
 var importData=[];
 function openImportModal(){importData=[];document.getElementById('excel-paste').value='';document.getElementById('import-tbody').innerHTML='';document.getElementById('import-table-wrap').style.display='none';document.getElementById('import-summary').innerHTML='';document.getElementById('import-btn').disabled=true;document.getElementById('modal-import').classList.add('open');}
 function closeImportModal(){document.getElementById('modal-import').classList.remove('open');}
@@ -2008,7 +2197,12 @@ function closeProfileModal(){document.getElementById('modal-profile').classList.
 var ACTION_META={'CREATE_SAMPLE':{icon:'➕',label:'Tạo mẫu',badge:'create'},'EDIT_SAMPLE':{icon:'✏️',label:'Sửa mẫu',badge:'edit'},'ARCHIVE_SAMPLE':{icon:'🗄️',label:'Lưu trữ',badge:'archive'},'DELETE_SAMPLE':{icon:'🗑️',label:'Xóa mẫu',badge:'delete'},'BULK_TICK':{icon:'☑',label:'Tick hàng loạt',badge:'tick'},'TICK_STEP':{icon:'✓',label:'Tick bước',badge:'tick'},'FINISH_SAMPLE':{icon:'🏁',label:'Hoàn thành',badge:'tick'},'IMPORT_EXCEL':{icon:'📋',label:'Import Excel',badge:'import'},'CAMERA_UPLOAD':{icon:'📷',label:'Upload ảnh',badge:'camera'},'RESTORE_SAMPLE':{icon:'↩',label:'Phục hồi',badge:'restore'}};
 function renderProfileModal(){var who=currentUser?(currentUser.displayName||currentUser.email||'Khách'):'Khách';var avatar=currentUser&&currentUser.photoURL?'<img src="'+currentUser.photoURL+'" style="width:44px;height:44px;border-radius:var(--r-sm);border:1px solid rgba(193,127,36,.4);object-fit:cover;" />':'<span style="font-size:1.3rem;">👤</span>';document.getElementById('profile-hero-wrap').innerHTML='<div class="profile-hero"><div class="profile-avatar">'+avatar+'</div><div><div class="profile-name">'+who+'</div><div class="profile-sub">'+(currentUser?currentUser.email:'Chưa đăng nhập')+'</div></div></div>';var rawLog=JSON.parse(localStorage.getItem('ptn_log')||'[]');var todayStr=new Date().toLocaleDateString('vi-VN');var todayLog=rawLog.filter(function(e){return new Date(e.at).toLocaleDateString('vi-VN')===todayStr;});document.getElementById('profile-kpi-wrap').innerHTML='<div class="profile-kpi"><div class="pk-val">'+todayLog.length+'</div><div class="pk-lbl">Hôm nay</div></div><div class="profile-kpi"><div class="pk-val">'+rawLog.filter(function(e){return e.action==='CREATE_SAMPLE'||e.action==='IMPORT_EXCEL';}).length+'</div><div class="pk-lbl">Đã tạo mẫu</div></div><div class="profile-kpi"><div class="pk-val">'+rawLog.filter(function(e){return e.action==='ARCHIVE_SAMPLE';}).length+'</div><div class="pk-lbl">Đã lưu trữ</div></div>';var groups={};rawLog.forEach(function(e){var d=new Date(e.at).toLocaleDateString('vi-VN');if(!groups[d])groups[d]=[];groups[d].push(e);});var wrap=document.getElementById('profile-log-wrap');if(!rawLog.length){wrap.innerHTML='<div class="profile-empty">📭 Chưa có hoạt động</div>';return;}var dates=Object.keys(groups).sort(function(a,b){function pd(s){var p=s.split('/');return p.length===3?new Date(p[2],p[1]-1,p[0]):new Date(0);}return pd(b)-pd(a);});wrap.innerHTML='';dates.forEach(function(dateStr){var isToday=dateStr===todayStr;var events=groups[dateStr];var groupEl=document.createElement('div');groupEl.className='day-group';var weekdays=['Chủ nhật','Thứ hai','Thứ ba','Thứ tư','Thứ năm','Thứ sáu','Thứ bảy'];function pdLabel(s){var p=s.split('/');return p.length===3?new Date(p[2],p[1]-1,p[0]):new Date(0);}var wday=isToday?'Hôm nay':weekdays[pdLabel(dateStr).getDay()];groupEl.innerHTML='<div class="day-group-head'+(isToday?' today-head':'')+'" onclick="toggleDayGroup(this)"><span class="dg-date">'+wday+' — '+dateStr+'</span><span class="dg-count">'+events.length+'</span><span class="dg-arrow'+(isToday?' open':'')+'">▾</span></div><div class="day-group-body'+(isToday?' open':'')+'"></div>';var bodyEl=groupEl.querySelector('.day-group-body');events.forEach(function(e){var meta=ACTION_META[e.action]||{icon:'📌',label:e.action,badge:'edit'};var row=document.createElement('div');row.className='act-row';row.innerHTML='<span class="act-icon">'+meta.icon+'</span><div class="act-body"><b>'+(e.sampleId||'')+'</b> <span>'+(e.detail||'')+'</span></div><span class="act-badge '+meta.badge+'">'+meta.label+'</span><span class="act-time">'+new Date(e.at).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'})+'</span>';bodyEl.appendChild(row);});wrap.appendChild(groupEl);});}
 function toggleDayGroup(headEl){var body=headEl.nextElementSibling;var arrow=headEl.querySelector('.dg-arrow');var isOpen=body.classList.contains('open');body.classList.toggle('open',!isOpen);if(arrow)arrow.classList.toggle('open',!isOpen);}
-
+function switchArchiveTab(tab) {
+  document.getElementById('archive-bh-content').style.display = tab==='bh'?'':'none';
+  document.getElementById('archive-samples-content').style.display = tab==='samples'?'':'none';
+  document.getElementById('arch-tab-bh').classList.toggle('active', tab==='bh');
+  document.getElementById('arch-tab-samples').classList.toggle('active', tab==='samples');
+}
 // ════════════════════ PIPELINE BOARD ════════════════════
 var bdSelUid=null,bdHk='';
 

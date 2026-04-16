@@ -2429,46 +2429,21 @@ var HK_STEPS=[
 var HK_STEP_IDS=HK_STEPS.map(function(s){return s.id;});
 
 function calcHkPct(h){return Math.round(HK_STEP_IDS.filter(function(id){return h.steps&&h.steps[id];}).length/HK_STEP_IDS.length*100);}
-function syncHk(h){
-  if(!fbReady || !db){
-    console.error("Firebase chưa sẵn sàng");
-    return Promise.reject();
-  }
-  var id = 'hk_' + h.uid;
-  h.fsId = id;
-  return db.collection('ptn_hokhoan').doc(id).set(
-    Object.assign({}, h, {
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }),
-    { merge: true }
-  );
-}
+function syncHk(h){if(!fbReady||!db)return;var id='hk_'+h.uid;h.fsId=id;db.collection('ptn_hokhoan').doc(id).set(Object.assign({},h,{updatedAt:firebase.firestore.FieldValue.serverTimestamp()}),{merge:true}).catch(function(e){console.warn(e);});}
 function syncHkArchived(h){if(!fbReady||!db)return;var id='hka_'+h.uid;h.fsId=id;db.collection('ptn_hokhoan_archived').doc(id).set(h,{merge:true}).catch(function(e){console.warn(e);});}
 
 // Load HK from Firestore on startup
-function loadHk(){
+(function loadHk(){
   if(!fbReady||!db)return;
-
-  hoKhoanList = [];
-  hoKhoanArchived = [];
-
   Promise.all([
-    db.collection('ptn_hokhoan').get(),
-    db.collection('ptn_hokhoan_archived').get()
+    db.collection('ptn_hokhoan').get().catch(function(){return{forEach:function(){}};}),
+    db.collection('ptn_hokhoan_archived').get().catch(function(){return{forEach:function(){}};})
   ]).then(function(r){
-    r[0].forEach(function(d){
-      hoKhoanList.push({...d.data(), fsId:d.id});
-    });
-    r[1].forEach(function(d){
-      hoKhoanArchived.push({...d.data(), fsId:d.id});
-    });
-
-    renderHkList();
-    updateStats();
-  }).catch(function(e){
-    console.error("Load HK lỗi:", e);
+    r[0].forEach(function(d){hoKhoanList.push(Object.assign({},d.data(),{fsId:d.id}));});
+    r[1].forEach(function(d){hoKhoanArchived.push(Object.assign({},d.data(),{fsId:d.id}));});
+    renderHkList();updateStats();
   });
-}
+})();
 
 // Override updateStats to include HK count
 var _origUpdateStats=updateStats;

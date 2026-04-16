@@ -1896,12 +1896,9 @@ function buildCard(s){
     '</div>'+
     '<div class="sample-body'+(s.open?' open':'')+'" id="body-'+s.uid+'"></div>'+
     '<div class="sample-footer">'+
-  '<span class="footer-who">'+(h.createdBy?'Tạo bởi: '+h.createdBy:'')+(h.createdAt?' · '+h.createdAt:'')+'</span>'+
-  '<div style="display:flex;gap:5px;">'+
-    '<button class="btn btn-ghost btn-sm" style="border-color:var(--sky);color:var(--sky);" onclick="goToCameraWithHk(\''+h.name+'\')">📸 Chụp hình</button>'+
-    '<button class="btn btn-ghost btn-sm" onclick="archiveHkPrompt('+h.uid+',false)">🗄️ Lưu trữ</button>'+
-  '</div>'+
-'</div>';
+      '<span class="footer-who">'+(s.createdBy?'Tạo bởi: '+s.createdBy:'')+(s.depth?' · ⬇ '+s.depth+'m':'')+'</span>'+
+      '<button class="btn btn-ghost btn-sm" onclick="archivePrompt('+s.uid+',false)">🗄️ Lưu trữ</button>'+
+    '</div>';
   var body=item.querySelector('#body-'+s.uid);
   if(s.open)body.appendChild(buildWorkflowShell(s));
   return item;
@@ -2202,10 +2199,7 @@ function resizeAndUpload(file,prefix,statusEl,logListEl,btnEl,previewEl){
   function addLogEntry(msg,ok){if(!logListEl)return;var entry=document.createElement('div');entry.style.cssText='padding:6px 10px;border-radius:var(--r-sm);font-size:.74rem;font-weight:600;background:'+(ok?'var(--moss-pale)':'#fff0ee')+';border:1px solid '+(ok?'var(--moss)':'var(--rust)')+';color:'+(ok?'var(--moss)':'var(--rust)')+';';entry.textContent=(ok?'✅ ':'❌ ')+msg;logListEl.insertBefore(entry,logListEl.firstChild);while(logListEl.children.length>8)logListEl.removeChild(logListEl.lastChild);}
   showStatus('⏳ Đang xử lý...','uploading');if(btnEl)btnEl.disabled=true;
   var img=new Image();
-  img.onload=function(){var maxW=1280,maxH=1280;var ratio=Math.min(maxW/img.width,maxH/img.height,1);var w=Math.round(img.width*ratio),h=Math.round(img.height*ratio);var cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);var b64=cv.toDataURL('image/jpeg',0.85).replace(/^data:image\/jpeg;base64,/,'');URL.revokeObjectURL(objUrl);showStatus('⏳ Đang upload...','uploading');
-var hkFilename = (_cameraHkName && prefix!=='pc') ? getHkPhotoFilename(_cameraHkName) : null;
-var finalFilename = hkFilename ? (hkFilename + '.jpg') : (prefix+'_'+Date.now()+'.jpg');
-fetch(APPS_SCRIPT,{method:'POST',body:new URLSearchParams({image:b64,filename:finalFilename})}).then(function(r){return r.text();}).then(function(resp){showStatus('✅ Upload thành công!','success');addLogEntry(new Date().toLocaleTimeString('vi-VN')+' — '+file.name,true);logActivity('CAMERA_UPLOAD','',prefix);if(btnEl)btnEl.disabled=false;}).catch(function(err){showStatus('❌ Lỗi: '+err.message,'error');addLogEntry('Lỗi: '+err.message,false);if(btnEl)btnEl.disabled=false;});};
+  img.onload=function(){var maxW=1280,maxH=1280;var ratio=Math.min(maxW/img.width,maxH/img.height,1);var w=Math.round(img.width*ratio),h=Math.round(img.height*ratio);var cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);var b64=cv.toDataURL('image/jpeg',0.85).replace(/^data:image\/jpeg;base64,/,'');URL.revokeObjectURL(objUrl);showStatus('⏳ Đang upload...','uploading'); var hkFilename = (_cameraHkName && prefix!=='pc') ? getHkPhotoFilename(_cameraHkName) : null; var finalFilename = hkFilename ? (hkFilename + '.jpg') : (prefix+'_'+Date.now()+'.jpg'); fetch(APPS_SCRIPT,{method:'POST',body:new URLSearchParams({image:b64,filename:finalFilename})}).then(function(r){return r.text();}).then(function(resp){showStatus('✅ Upload thành công!','success');addLogEntry(new Date().toLocaleTimeString('vi-VN')+' — '+file.name,true);logActivity('CAMERA_UPLOAD','',prefix);if(btnEl)btnEl.disabled=false;}).catch(function(err){showStatus('❌ Lỗi: '+err.message,'error');addLogEntry('Lỗi: '+err.message,false);if(btnEl)btnEl.disabled=false;});};
   img.onerror=function(){showStatus('❌ Không đọc được ảnh','error');if(btnEl)btnEl.disabled=false;};img.src=objUrl;
 }
 (function initPcCam(){var btn=document.getElementById('pc-upload-btn');var input=document.getElementById('pcFileInput');var statusEl=document.getElementById('pc-upload-status');var logListEl=document.getElementById('pc-log-list');var strip=document.getElementById('pc-preview-strip');btn.addEventListener('click',function(){input.click();});input.addEventListener('change',function(){var files=Array.from(input.files||[]);if(!files.length)return;strip.innerHTML='';files.forEach(function(file,i){var thumb=document.createElement('img');thumb.style.cssText='width:64px;height:64px;object-fit:cover;border:var(--border-md);border-radius:var(--r-sm);';thumb.src=URL.createObjectURL(file);strip.appendChild(thumb);setTimeout(function(){resizeAndUpload(file,'pc',statusEl,logListEl,files.length===1?btn:null,null);},i*200);});if(files.length>1){btn.disabled=true;setTimeout(function(){btn.disabled=false;},files.length*3000);}input.value='';});})();
@@ -2539,9 +2533,12 @@ function buildHkCard(h){
       '</div>'+
     '</div>'+
     '<div class="sample-footer">'+
-      '<span class="footer-who">'+(h.createdBy?'Tạo bởi: '+h.createdBy:'')+(h.createdAt?' · '+h.createdAt:'')+'</span>'+
-      '<button class="btn btn-ghost btn-sm" onclick="archiveHkPrompt('+h.uid+',false)">🗄️ Lưu trữ</button>'+
-    '</div>';
+  '<span class="footer-who">'+(h.createdBy?'Tạo bởi: '+h.createdBy:'')+(h.createdAt?' · '+h.createdAt:'')+'</span>'+
+  '<div style="display:flex;gap:5px;">'+
+    '<button class="btn btn-ghost btn-sm" style="border-color:var(--sky);color:var(--sky);" onclick="goToCameraWithHk(\''+h.name+'\')">📸 Chụp hình</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="archiveHkPrompt('+h.uid+',false)">🗄️ Lưu trữ</button>'+
+  '</div>'+
+'</div>';
   // Attach step click events
   setTimeout(function(){
     HK_STEPS.forEach(function(step){

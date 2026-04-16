@@ -1896,9 +1896,12 @@ function buildCard(s){
     '</div>'+
     '<div class="sample-body'+(s.open?' open':'')+'" id="body-'+s.uid+'"></div>'+
     '<div class="sample-footer">'+
-      '<span class="footer-who">'+(s.createdBy?'Tạo bởi: '+s.createdBy:'')+(s.depth?' · ⬇ '+s.depth+'m':'')+'</span>'+
-      '<button class="btn btn-ghost btn-sm" onclick="archivePrompt('+s.uid+',false)">🗄️ Lưu trữ</button>'+
-    '</div>';
+  '<span class="footer-who">'+(h.createdBy?'Tạo bởi: '+h.createdBy:'')+(h.createdAt?' · '+h.createdAt:'')+'</span>'+
+  '<div style="display:flex;gap:5px;">'+
+    '<button class="btn btn-ghost btn-sm" style="border-color:var(--sky);color:var(--sky);" onclick="goToCameraWithHk(\''+h.name+'\')">📸 Chụp hình</button>'+
+    '<button class="btn btn-ghost btn-sm" onclick="archiveHkPrompt('+h.uid+',false)">🗄️ Lưu trữ</button>'+
+  '</div>'+
+'</div>';
   var body=item.querySelector('#body-'+s.uid);
   if(s.open)body.appendChild(buildWorkflowShell(s));
   return item;
@@ -2199,7 +2202,10 @@ function resizeAndUpload(file,prefix,statusEl,logListEl,btnEl,previewEl){
   function addLogEntry(msg,ok){if(!logListEl)return;var entry=document.createElement('div');entry.style.cssText='padding:6px 10px;border-radius:var(--r-sm);font-size:.74rem;font-weight:600;background:'+(ok?'var(--moss-pale)':'#fff0ee')+';border:1px solid '+(ok?'var(--moss)':'var(--rust)')+';color:'+(ok?'var(--moss)':'var(--rust)')+';';entry.textContent=(ok?'✅ ':'❌ ')+msg;logListEl.insertBefore(entry,logListEl.firstChild);while(logListEl.children.length>8)logListEl.removeChild(logListEl.lastChild);}
   showStatus('⏳ Đang xử lý...','uploading');if(btnEl)btnEl.disabled=true;
   var img=new Image();
-  img.onload=function(){var maxW=1280,maxH=1280;var ratio=Math.min(maxW/img.width,maxH/img.height,1);var w=Math.round(img.width*ratio),h=Math.round(img.height*ratio);var cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);var b64=cv.toDataURL('image/jpeg',0.85).replace(/^data:image\/jpeg;base64,/,'');URL.revokeObjectURL(objUrl);showStatus('⏳ Đang upload...','uploading');fetch(APPS_SCRIPT,{method:'POST',body:new URLSearchParams({image:b64,filename:prefix+'_'+Date.now()+'.jpg'})}).then(function(r){return r.text();}).then(function(resp){showStatus('✅ Upload thành công!','success');addLogEntry(new Date().toLocaleTimeString('vi-VN')+' — '+file.name,true);logActivity('CAMERA_UPLOAD','',prefix);if(btnEl)btnEl.disabled=false;}).catch(function(err){showStatus('❌ Lỗi: '+err.message,'error');addLogEntry('Lỗi: '+err.message,false);if(btnEl)btnEl.disabled=false;});};
+  img.onload=function(){var maxW=1280,maxH=1280;var ratio=Math.min(maxW/img.width,maxH/img.height,1);var w=Math.round(img.width*ratio),h=Math.round(img.height*ratio);var cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);var var b64=cv.toDataURL('image/jpeg',0.85).replace(/^data:image\/jpeg;base64,/,'');URL.revokeObjectURL(objUrl);showStatus('⏳ Đang upload...','uploading');
+var hkFilename = (_cameraHkName && prefix!=='pc') ? getHkPhotoFilename(_cameraHkName) : null;
+var finalFilename = hkFilename ? (hkFilename + '.jpg') : (prefix+'_'+Date.now()+'.jpg');
+fetch(APPS_SCRIPT,{method:'POST',body:new URLSearchParams({image:b64,filename:finalFilename})}).then(function(r){return r.text();}).then(function(resp){showStatus('✅ Upload thành công!','success');addLogEntry(new Date().toLocaleTimeString('vi-VN')+' — '+file.name,true);logActivity('CAMERA_UPLOAD','',prefix);if(btnEl)btnEl.disabled=false;}).catch(function(err){showStatus('❌ Lỗi: '+err.message,'error');addLogEntry('Lỗi: '+err.message,false);if(btnEl)btnEl.disabled=false;});};
   img.onerror=function(){showStatus('❌ Không đọc được ảnh','error');if(btnEl)btnEl.disabled=false;};img.src=objUrl;
 }
 (function initPcCam(){var btn=document.getElementById('pc-upload-btn');var input=document.getElementById('pcFileInput');var statusEl=document.getElementById('pc-upload-status');var logListEl=document.getElementById('pc-log-list');var strip=document.getElementById('pc-preview-strip');btn.addEventListener('click',function(){input.click();});input.addEventListener('change',function(){var files=Array.from(input.files||[]);if(!files.length)return;strip.innerHTML='';files.forEach(function(file,i){var thumb=document.createElement('img');thumb.style.cssText='width:64px;height:64px;object-fit:cover;border:var(--border-md);border-radius:var(--r-sm);';thumb.src=URL.createObjectURL(file);strip.appendChild(thumb);setTimeout(function(){resizeAndUpload(file,'pc',statusEl,logListEl,files.length===1?btn:null,null);},i*200);});if(files.length>1){btn.disabled=true;setTimeout(function(){btn.disabled=false;},files.length*3000);}input.value='';});})();
@@ -2685,6 +2691,44 @@ function applyHkBulk(){if(!requireAuth())return;var selH=hoKhoanList.filter(func
 function applyHkBulkUntick(){if(!requireAuth())return;var selH=hoKhoanList.filter(function(h){return hkBulkSel[h.uid];});var selSt=HK_STEP_IDS.filter(function(id){return hkBulkStepSel[id];});if(!selH.length||!selSt.length){alert('Chọn ít nhất 1 hố và 1 bước!');return;}selH.forEach(function(h){selSt.forEach(function(id){h.steps[id]=false;});syncHk(h);refreshHkCard(h);});alert('✅ Đã bỏ tick '+selSt.length+' bước cho '+selH.length+' hố khoan!');}
 function hkBulkArchive(){var selH=hoKhoanList.filter(function(h){return hkBulkSel[h.uid];});if(!selH.length){alert('Chọn ít nhất 1 hố!');return;}document.getElementById('confirm-title').textContent='🗄️ Lưu trữ hàng loạt?';document.getElementById('confirm-msg').textContent='Chuyển '+selH.length+' hố khoan vào lưu trữ?';document.getElementById('confirm-ok-btn').className='btn btn-moss';document.getElementById('confirm-ok-btn').textContent='🗄️ Xác nhận';confirmAction=function(){selH.forEach(function(h){archiveHkPrompt(h.uid,false);});closeHkBulkModal();};document.getElementById('confirm-overlay').classList.add('open');}
 function hkBulkDelete(){var selH=hoKhoanList.filter(function(h){return hkBulkSel[h.uid];});if(!selH.length){alert('Chọn ít nhất 1 hố!');return;}document.getElementById('confirm-title').textContent='🗑️ Xóa hàng loạt?';document.getElementById('confirm-msg').textContent='Chuyển '+selH.length+' hố vào thùng rác?';document.getElementById('confirm-ok-btn').className='btn btn-rust';document.getElementById('confirm-ok-btn').textContent='🗑️ Xóa '+selH.length+' hố';confirmAction=function(){selH.forEach(function(h){deleteHkPrompt(h.uid);});hkBulkSel={};closeHkBulkModal();};document.getElementById('confirm-overlay').classList.add('open');}
+   // ══ CAMERA WITH HK NAME ══
+var _cameraHkName = '';
+var _hkPhotoCount = {};
+
+function goToCameraWithHk(hkName) {
+  _cameraHkName = hkName;
+  // Chuyển sang tab Camera
+  var cameraBtn = document.querySelector('.side-btn[onclick*="camera"]');
+  if (cameraBtn) {
+    document.querySelectorAll('.content-section').forEach(function(s){ s.classList.remove('active'); });
+    document.querySelectorAll('.side-btn').forEach(function(b){ b.classList.remove('active'); });
+    document.getElementById('section-camera').classList.add('active');
+    cameraBtn.classList.add('active');
+  }
+  // Hiển thị banner thông báo tên HK đang chụp
+  showHkCameraBanner(hkName);
+}
+
+function showHkCameraBanner(hkName) {
+  var existing = document.getElementById('hk-camera-banner');
+  if (existing) existing.remove();
+  if (!hkName) return;
+  var banner = document.createElement('div');
+  banner.id = 'hk-camera-banner';
+  banner.style.cssText = 'background:linear-gradient(90deg,var(--sky),#2d5470);color:white;padding:10px 16px;border-radius:var(--r-md);margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;font-weight:600;font-size:.84rem;box-shadow:var(--shadow-sm);';
+  banner.innerHTML = '<span>📍 Đang chụp cho hố khoan: <b style="font-family:var(--font-mono);font-size:.96rem;margin-left:4px;">'+hkName+'</b></span>' +
+    '<button onclick="_cameraHkName=\'\';this.parentNode.remove();" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.35);border-radius:var(--r-sm);color:white;padding:3px 10px;cursor:pointer;font-size:.75rem;font-weight:600;">✕ Bỏ chọn</button>';
+  var camSection = document.getElementById('section-camera');
+  camSection.insertBefore(banner, camSection.firstChild);
+}
+
+function getHkPhotoFilename(hkName) {
+  if (!hkName) return null;
+  if (!_hkPhotoCount[hkName]) _hkPhotoCount[hkName] = 0;
+  _hkPhotoCount[hkName]++;
+  var count = _hkPhotoCount[hkName];
+  return count === 1 ? hkName : hkName + ' (' + (count - 1) + ')';
+}
 </script>
 </body>
 </html>

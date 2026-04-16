@@ -1733,7 +1733,7 @@ var FB_CONFIG={apiKey:"AIzaSyCiLP0uKWKR3LkvvdaSabSxhzN9s6G7A6c",authDomain:"las-
 var db=null,fbAuth=null,currentUser=null,fbReady=false;
 try{
   firebase.initializeApp(FB_CONFIG);
-  db=firebase.firestore();fbAuth=firebase.auth();fbReady=true; loadHk();
+  db=firebase.firestore();fbAuth=firebase.auth();fbReady=true;
   document.getElementById('google-btn').addEventListener('click',function(){fbAuth.signInWithPopup(new firebase.auth.GoogleAuthProvider()).then(function(){closeAuthModal();}).catch(function(e){alert('Lỗi: '+e.message);});});
   fbAuth.onAuthStateChanged(function(u){currentUser=u||null;updateUserUI(u);});
 }catch(e){console.warn('Firebase init error:',e);}

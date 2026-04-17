@@ -2137,7 +2137,20 @@ function permDeletePrompt(typeOrUid,uid2){
   };
   document.getElementById('confirm-overlay').classList.add('open');
 }
-function emptyTrashPrompt(){if(!trashed.length){alert('Thùng rác đã trống!');return;}document.getElementById('confirm-title').textContent='⚠️ Dọn sạch thùng rác?';document.getElementById('confirm-msg').textContent='Xóa vĩnh viễn '+trashed.length+' mẫu. KHÔNG thể hoàn tác.';document.getElementById('confirm-ok-btn').className='btn btn-rust';document.getElementById('confirm-ok-btn').textContent='✕ Xóa tất cả '+trashed.length+' mẫu';confirmAction=function(){if(fbReady&&db){trashed.forEach(function(s){db.collection('ptn_deleted').doc('d_'+s.uid).delete().catch(function(){});db.collection('ptn_samples').doc('s_'+s.uid).delete().catch(function(){});db.collection('ptn_archived').doc('a_'+s.uid).delete().catch(function(){});});}trashed=[];logActivity('EMPTY_TRASH','','');renderTrash();updateTrashBadge();};document.getElementById('confirm-overlay').classList.add('open');}
+function emptyTrashPrompt(){if(!trashed.length){alert('Thùng rác đã trống!');return;}document.getElementById('confirm-title').textContent='⚠️ Dọn sạch thùng rác?';document.getElementById('confirm-msg').textContent='Xóa vĩnh viễn '+trashed.length+' mẫu. KHÔNG thể hoàn tác.';document.getElementById('confirm-ok-btn').className='btn btn-rust';document.getElementById('confirm-ok-btn').textContent='✕ Xóa tất cả '+trashed.length+' mẫu';confirmAction=function(){if(fbReady&&db){trashed.forEach(function(s){
+  var uid = s.uid;
+
+  // 🔥 XÓA CẢ 2 LOẠI luôn (dù có tồn tại hay không)
+  db.collection('ptn_deleted').doc('d_'+uid).delete().catch(function(){});
+  db.collection('ptn_deleted').doc('dhk_'+uid).delete().catch(function(){});
+
+  // 🔥 XÓA luôn data gốc
+  db.collection('ptn_samples').doc('s_'+uid).delete().catch(function(){});
+  db.collection('ptn_archived').doc('a_'+uid).delete().catch(function(){});
+
+  db.collection('ptn_hokhoan').doc('hk_'+uid).delete().catch(function(){});
+  db.collection('ptn_hokhoan_archived').doc('hka_'+uid).delete().catch(function(){});
+});}trashed=[];logActivity('EMPTY_TRASH','','');renderTrash();updateTrashBadge();};document.getElementById('confirm-overlay').classList.add('open');}
 function doArchive(uid){var idx=samples.findIndex(function(x){return x.uid===uid;});if(idx<0)return;var s=samples.splice(idx,1)[0];s.archivedAt=new Date().toLocaleDateString('vi-VN');archived.push(s);_pendingDelete[uid]=true;var card=document.getElementById('card-'+uid);if(card)card.remove();if(!samples.length)document.getElementById('empty-samples').style.display='block';updateStats();deleteSampleDoc(s);syncArchived(s);logActivity('ARCHIVE_SAMPLE',s.id,'');renderArchive();}
 
 var archiveSel={};

@@ -2692,8 +2692,80 @@ function hkBulkStepSelAll(val){HK_STEP_IDS.forEach(function(id){hkBulkStepSel[id
 function updateHkBkCounts(){var sc=hoKhoanList.filter(function(h){return hkBulkSel[h.uid];}).length;var stc=HK_STEP_IDS.filter(function(id){return hkBulkStepSel[id];}).length;document.getElementById('hkb-sc').textContent=sc+' hố';document.getElementById('hkb-stc').textContent=stc+' bước';var prev=document.getElementById('hkb-preview');if(!sc){prev.textContent='Chọn hố khoan để thao tác';}else if(stc){prev.textContent='→ '+stc+' bước × '+sc+' hố';prev.style.color='var(--moss)';}else{prev.textContent=sc+' hố đã chọn';prev.style.color='var(--sky)';}}
 function applyHkBulk(){if(!requireAuth())return;var selH=hoKhoanList.filter(function(h){return hkBulkSel[h.uid];});var selSt=HK_STEP_IDS.filter(function(id){return hkBulkStepSel[id];});if(!selH.length||!selSt.length){alert('Chọn ít nhất 1 hố và 1 bước!');return;}selH.forEach(function(h){selSt.forEach(function(id){h.steps[id]=true;});syncHk(h);refreshHkCard(h);});logActivity('BULK_TICK_HK','',selH.length+'hố/'+selSt.length+'bước');renderHkBulkList();updateHkBkCounts();selH.forEach(function(h){if(calcHkPct(h)===100)setTimeout(function(){closeHkBulkModal();archiveHkPrompt(h.uid,true);},800);});alert('✅ Đã tick '+selSt.length+' bước cho '+selH.length+' hố khoan!');}
 function applyHkBulkUntick(){if(!requireAuth())return;var selH=hoKhoanList.filter(function(h){return hkBulkSel[h.uid];});var selSt=HK_STEP_IDS.filter(function(id){return hkBulkStepSel[id];});if(!selH.length||!selSt.length){alert('Chọn ít nhất 1 hố và 1 bước!');return;}selH.forEach(function(h){selSt.forEach(function(id){h.steps[id]=false;});syncHk(h);refreshHkCard(h);});alert('✅ Đã bỏ tick '+selSt.length+' bước cho '+selH.length+' hố khoan!');}
-function hkBulkArchive(){var selH=hoKhoanList.filter(function(h){return hkBulkSel[h.uid];});if(!selH.length){alert('Chọn ít nhất 1 hố!');return;}document.getElementById('confirm-title').textContent='🗄️ Lưu trữ hàng loạt?';document.getElementById('confirm-msg').textContent='Chuyển '+selH.length+' hố khoan vào lưu trữ?';document.getElementById('confirm-ok-btn').className='btn btn-moss';document.getElementById('confirm-ok-btn').textContent='🗄️ Xác nhận';confirmAction=function(){selH.forEach(function(h){archiveHkPrompt(h.uid,false);});closeHkBulkModal();};document.getElementById('confirm-overlay').classList.add('open');}
-function hkBulkDelete(){var selH=hoKhoanList.filter(function(h){return hkBulkSel[h.uid];});if(!selH.length){alert('Chọn ít nhất 1 hố!');return;}document.getElementById('confirm-title').textContent='🗑️ Xóa hàng loạt?';document.getElementById('confirm-msg').textContent='Chuyển '+selH.length+' hố vào thùng rác?';document.getElementById('confirm-ok-btn').className='btn btn-rust';document.getElementById('confirm-ok-btn').textContent='🗑️ Xóa '+selH.length+' hố';confirmAction=function(){selH.forEach(function(h){deleteHkPrompt(h.uid);});hkBulkSel={};closeHkBulkModal();};document.getElementById('confirm-overlay').classList.add('open');}
+function hkBulkArchive(){
+  var selH = hoKhoanList.filter(function(h){ return hkBulkSel[h.uid]; });
+  if(!selH.length){
+    alert('Chọn ít nhất 1 hố!');
+    return;
+  }
+
+  document.getElementById('confirm-title').textContent='🗄️ Lưu trữ hàng loạt?';
+  document.getElementById('confirm-msg').textContent='Chuyển '+selH.length+' hố khoan vào lưu trữ?';
+  document.getElementById('confirm-ok-btn').className='btn btn-moss';
+  document.getElementById('confirm-ok-btn').textContent='🗄️ Xác nhận';
+
+  confirmAction = function(){
+    selH.forEach(function(h){
+      var idx = hoKhoanList.findIndex(function(x){ return x.uid===h.uid; });
+      if(idx<0) return;
+
+      var hx = hoKhoanList.splice(idx,1)[0];
+      hx.archivedAt = new Date().toLocaleDateString('vi-VN');
+      hoKhoanArchived.push(hx);
+
+      if(fbReady && db){
+        db.collection('ptn_hokhoan').doc('hk_'+h.uid).delete().catch(function(){});
+        db.collection('ptn_hokhoan_archived').doc('hka_'+h.uid).set(hx).catch(function(){});
+      }
+    });
+
+    hkBulkSel = {};
+    renderHkList();
+    renderHkArchive();
+    updateStats();
+    closeHkBulkModal();
+  };
+
+  document.getElementById('confirm-overlay').classList.add('open');
+}
+function hkBulkDelete(){
+  var selH = hoKhoanList.filter(function(h){ return hkBulkSel[h.uid]; });
+  if(!selH.length){
+    alert('Chọn ít nhất 1 hố!');
+    return;
+  }
+
+  document.getElementById('confirm-title').textContent='🗑️ Xóa hàng loạt?';
+  document.getElementById('confirm-msg').textContent='Chuyển '+selH.length+' hố vào thùng rác?';
+  document.getElementById('confirm-ok-btn').className='btn btn-rust';
+  document.getElementById('confirm-ok-btn').textContent='🗑️ Xóa '+selH.length+' hố';
+
+  confirmAction = function(){
+    selH.forEach(function(h){
+      var idx = hoKhoanList.findIndex(function(x){ return x.uid===h.uid; });
+      if(idx<0) return;
+
+      var hx = hoKhoanList.splice(idx,1)[0];
+      hx.deletedAt = new Date().toLocaleDateString('vi-VN');
+      hx.deletedAtISO = new Date().toISOString();
+      hx.type = 'hk';
+      trashed.push(hx);
+
+      if(fbReady && db){
+        db.collection('ptn_hokhoan').doc('hk_'+h.uid).delete().catch(function(){});
+        db.collection('ptn_deleted').doc('dhk_'+h.uid).set(hx).catch(function(){});
+      }
+    });
+
+    hkBulkSel = {};
+    renderHkList();
+    updateStats();
+    updateTrashBadge();
+    closeHkBulkModal();
+  };
+
+  document.getElementById('confirm-overlay').classList.add('open');
+}
    // ══ CAMERA WITH HK NAME ══
 var _cameraHkName = '';
 var _hkPhotoCount = {};
